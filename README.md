@@ -86,3 +86,45 @@ Tauri 会复用同一份 `dist/` 网页构建产物，打出 Mac / Windows / Lin
 - 按语言分类的统计视图
 - 导出笔记为文本/Markdown
 - 深色模式已经跟随系统了，可以加个手动切换开关
+
+
+
+
+
+
+
+
+<p>
+诊断出Google OAuth提供商未在Supabase后端启用。
+诊断出Google OAuth提供商未在Supabase后端启用。
+这个报错不是代码问题，是 Supabase 后台没有开启 Google 登录这个第三方登录方式。provider is not enabled 就是明确在说"Google 这个 provider 没启用"。
+
+让我看一下代码确认没有别的问题：
+
+
+诊断了Google OAuth配置问题并规划解决步骤。
+诊断了Google OAuth配置问题并规划解决步骤。
+代码这边完全没问题（useAuth.ts 里调用 supabase.auth.signInWithOAuth({ provider: 'google' }) 是标准写法），问题出在 Supabase 后台还没把 Google 这个登录方式配置好。需要去做两件事：
+
+1. 去 Google Cloud Console 建一个 OAuth 客户端
+
+打开 console.cloud.google.com，新建或选一个项目
+左侧 APIs & Services → Credentials → 创建 OAuth client ID，应用类型选 Web application
+Authorized redirect URIs 里填一条 Supabase 给你的固定回调地址，格式是：
+  https://<你的项目ref>.supabase.co/auth/v1/callback
+项目 ref 可以在 Supabase 后台左上角项目设置里看到，或者直接去下一步 Supabase 后台里它会把这个地址预先填好给你复制
+
+建好后会拿到一组 Client ID 和 Client Secret
+2. 回 Supabase 后台把 Google Provider 打开
+
+打开你的项目 → 左侧 Authentication → Providers（或者叫 Sign In / Providers）
+找到 Google，点开，把开关打开（enabled）
+把上一步拿到的 Client ID 和 Client Secret 填进去
+保存
+3. 检查一下你本地/线上的域名有没有加到 Supabase 的白名单
+
+Authentication → URL Configuration 里，把你实际访问的域名（比如 http://localhost:5173，还有以后上线用的正式域名）加到 Redirect URLs 里，不然回调会跳转失败
+配置好之后，理论上不用改代码，直接点"使用 Google 登录"就能走通了。
+
+如果你现在没打算做 Google 登录，也可以先把这个按钮隐藏掉，只留密码/验证码登录，免得用户点了报错。要我帮你顺手把这个按钮加个开关（比如先注释掉或者做成 feature flag）吗？
+</p>

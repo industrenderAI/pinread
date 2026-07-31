@@ -40,18 +40,18 @@ export function NewItemSheet({
 
   return (
     <div className="fixed inset-0 z-20 mx-auto flex max-w-lg flex-col bg-paper">
-      <div className="flex items-center justify-between border-b border-line px-4 py-3.5">
-        <button onClick={onCancel} className="text-[15px] text-accent-text">
+      <div className="flex items-center justify-between  px-4 py-6">
+        <button onClick={onCancel} className="text-base font-semibold text-ink">
           取消
         </button>
-        <span className="text-[15px] font-medium">{isEdit ? '编辑笔记' : '新笔记'}</span>
-        <button onClick={handleSave} className="text-[15px] text-accent-text">
+        <span className="text-xl font-bold">{isEdit ? '编辑笔记' : '新笔记'}</span>
+        <button onClick={handleSave} className="text-base font-semibold  text-ink">
           完成
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-10 pt-4">
-        <p className="mb-1.5 text-xs text-ink-faint">语言分类</p>
+      <div className="flex-1 overflow-y-auto px-5 py-2">
+        <p className="mb-1.5 text-base font-bold text-ink py-2">语言分类</p>
         <div className="mb-3.5 flex flex-wrap gap-2">
           {languages.map((l) => (
             <button
@@ -93,15 +93,15 @@ export function NewItemSheet({
           </div>
         )}
 
-        <p className="mb-1.5 text-xs text-ink-faint">来源（可选，比如"纽约时报文章"）</p>
+        <p className="my-1.5 text-base font-bold text-ink py-2 ">来源</p>
         <input
           value={source}
           onChange={(e) => setSource(e.target.value)}
-          placeholder="自己填写来源"
+          placeholder="选填，如纽约时报"
           className="mb-3.5 h-9.5 w-full rounded-lg border border-line bg-paper-card px-2.5 text-sm outline-none"
         />
 
-        <p className="mb-1.5 text-xs text-ink-faint">粘贴单词 / 一句话 / 一段文章</p>
+        <p className="my-1.5 text-base font-bold text-ink py-2">笔记内容</p>
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}

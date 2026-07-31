@@ -6,8 +6,9 @@ import { ItemList } from './components/ItemList'
 import { NewItemSheet } from './components/NewItemSheet'
 import { ItemDetail } from './components/ItemDetail'
 import { ProfilePage } from './components/ProfilePage'
+import { LoginPage } from './components/LoginPage'
 
-type View = 'list' | 'new' | 'edit' | 'detail' | 'profile'
+type View = 'list' | 'new' | 'edit' | 'detail' | 'profile' | 'login'
 
 function App() {
   const {
@@ -64,6 +65,14 @@ function App() {
           user={user}
           onBack={() => setView('list')}
           onLogout={() => logout()}
+          onLoginClick={() => setView('login')}
+        />
+      )}
+
+      {view === 'login' && (
+        <LoginPage
+          onBack={() => setView('profile')}
+          onSuccess={() => setView('profile')}
           onSignUpWithPassword={signUpWithPassword}
           onSignInWithPassword={signInWithPassword}
           onSendOtp={sendOtp}
