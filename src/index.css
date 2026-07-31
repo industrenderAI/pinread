@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@theme {
+  /* --color-paper: #FAF9F6; */
+  --color-paper: #FFFFFF;
+  --color-paper-card: #FFFFFF;
+  --color-ink: #232323;
+  --color-ink-soft: #6B6B66;
+  --color-ink-faint: #A8A79F;
+  --color-line: #E8E6E0;
+  --color-accent: #1AFF80;
+  --color-accent-soft: #E2FBEC;
+  --color-accent-text: #0E7A3E;
+  --color-on-accent: #0B3B24;
+  --color-danger: #DD001B;
+  --font-serif-cn: "Noto Serif SC", serif;
+}
+
+/* 深色配色数值，通过下面的选择器决定何时生效 */
+:root {
+  --dark-paper: #1C1C1A;
+  --dark-paper-card: #252523;
+  --dark-ink: #EDEDE9;
+  --dark-ink-soft: #A8A79F;
+  --dark-ink-faint: #6B6B66;
+  --dark-line: #37372F;
+  --dark-accent: #1AFF80;
+  --dark-accent-soft: #123322;
+  --dark-accent-text: #4DFFA0;
+  --dark-on-accent: #0B3B24;
+  --dark-danger: #E08477;
+}
+
+/* 情况一：用户没有手动选择过，跟随系统深色模式 */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not(.dark) {
+    --color-paper: var(--dark-paper);
+    --color-paper-card: var(--dark-paper-card);
+    --color-ink: var(--dark-ink);
+    --color-ink-soft: var(--dark-ink-soft);
+    --color-ink-faint: var(--dark-ink-faint);
+    --color-line: var(--dark-line);
+    --color-accent: var(--dark-accent);
+    --color-accent-soft: var(--dark-accent-soft);
+    --color-accent-text: var(--dark-accent-text);
+    --color-on-accent: var(--dark-on-accent);
+    --color-danger: var(--dark-danger);
+  }
+}
+
+/* 情况二：用户在App内手动切到夜间模式（覆盖系统设置） */
+:root.dark {
+  --color-paper: var(--dark-paper);
+  --color-paper-card: var(--dark-paper-card);
+  --color-ink: var(--dark-ink);
+  --color-ink-soft: var(--dark-ink-soft);
+  --color-ink-faint: var(--dark-ink-faint);
+  --color-line: var(--dark-line);
+  --color-accent: var(--dark-accent);
+  --color-accent-soft: var(--dark-accent-soft);
+  --color-accent-text: var(--dark-accent-text);
+  --color-on-accent: var(--dark-on-accent);
+  --color-danger: var(--dark-danger);
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.ann {
+  border-bottom: 1.5px dashed var(--color-accent);
+  color: var(--color-accent-text);
+  cursor: pointer;
+}
+.ann.active {
+  background: var(--color-accent-soft);
+}
+/* 隐藏标注下划线时：只隐藏视觉样式，点击区域依然保留，方便随时切回 */
+.ann-hidden .ann {
+  border-bottom-color: transparent;
+  color: inherit;
+}
+.ann-hidden .ann.active {
+  background: var(--color-accent-soft);
+}
+
+.icon-btn img {
+  filter: none;
+}
+:root.dark .icon-btn img {
+  filter: invert(1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not(.dark) .icon-btn img {
+    filter: invert(1);
+  }
+}
