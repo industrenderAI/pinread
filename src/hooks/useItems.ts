@@ -1,38 +1,51 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Annotation, Item, Language } from '../types/item'
-import * as db from '../storage/db'
+import { localRepository } from '../storage/localRepository'
+import { createCloudRepository } from '../storage/cloudRepository'
+import { migrateLocalToCloud } from '../storage/migrateLocalToCloud'
 
-function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
-}
-
-export function useItems() {
+/**
+ * userId 为 null：未登录，走本地 localStorage（本地体验版）。
+ * userId 有值：已登录，走 Supabase 云端数据库，多设备共享同一份数据。
+ * 从 null 变成有值的那一刻（刚登录成功），会先把这台设备上的本地笔记
+ * 迁移一次到云端，详见 migrateLocalToCloud。
+ */
+export function useItems(userId: string | null) {
   const [items, setItems] = useState<Item[]>([])
   const [languages, setLanguages] = useState<Language[]>([])
   const [loading, setLoading] = useState(true)
 
+  const repo = useMemo(
+    () => (userId ? createCloudRepository(userId) : localRepository),
+    [userId],
+  )
+
   useEffect(() => {
+    let cancelled = false
+    setLoading(true)
     ;(async () => {
+      if (userId) {
+        await migrateLocalToCloud(userId)
+      }
       const [loadedItems, loadedLanguages] = await Promise.all([
-        db.getItems(),
-        db.getLanguages(),
+        repo.getItems(),
+        repo.getLanguages(),
       ])
+      if (cancelled) return
       setItems(loadedItems)
       setLanguages(loadedLanguages)
       setLoading(false)
     })()
-  }, [])
-
-  const persist = useCallback(async (next: Item[]) => {
-    setItems(next)
-    await db.saveItems(next)
-  }, [])
+    return () => {
+      cancelled = true
+    }
+  }, [userId, repo])
 
   const addItem = useCallback(
     async (content: string, source: string, language: string) => {
       const now = Date.now()
       const item: Item = {
-        id: uid(),
+        id: crypto.randomUUID(),
         content,
         source,
         language,
@@ -40,79 +53,82 @@ export function useItems() {
         updatedAt: now,
         annotations: [],
       }
-      await persist([...items, item])
+      await repo.addItem(item)
+      setItems((prev) => [item, ...prev])
       return item
     },
-    [items, persist],
+    [repo],
   )
 
   const updateItem = useCallback(
     async (id: string, content: string, source: string, language: string) => {
-      const next = items.map((it) => {
-        if (it.id !== id) return it
+      const now = Date.now()
+      setItems((prev) => {
+        const current = prev.find((it) => it.id === id)
+        if (!current) return prev
         // 批注是按字符位置(start/end)定位的，原文一旦改动，旧的位置就可能不再
         // 对应原来选中的那段文字，所以这里只在原文没变时保留批注，原文变了就清空，
         // 避免出现批注错位、指向错误文字的问题。
-        const contentChanged = it.content !== content
-        return {
-          ...it,
-          content,
-          source,
-          language,
-          annotations: contentChanged ? [] : it.annotations,
-          updatedAt: Date.now(),
-        }
+        const contentChanged = current.content !== content
+        const annotations = contentChanged ? [] : current.annotations
+        repo
+          .updateItem(id, { content, source, language, annotations, updatedAt: now })
+          .catch((err) => console.error('updateItem failed', err))
+        return prev.map((it) =>
+          it.id === id ? { ...it, content, source, language, annotations, updatedAt: now } : it,
+        )
       })
-      await persist(next)
     },
-    [items, persist],
+    [repo],
   )
 
   const deleteItem = useCallback(
     async (id: string) => {
-      await persist(items.filter((it) => it.id !== id))
+      await repo.deleteItem(id)
+      setItems((prev) => prev.filter((it) => it.id !== id))
     },
-    [items, persist],
+    [repo],
   )
 
   const addAnnotation = useCallback(
     async (itemId: string, start: number, end: number, note: string) => {
-      const annotation: Annotation = { id: uid(), start, end, note }
-      const next = items.map((it) =>
-        it.id === itemId
-          ? { ...it, annotations: [...it.annotations, annotation], updatedAt: Date.now() }
-          : it,
+      const annotation: Annotation = { id: crypto.randomUUID(), start, end, note }
+      const now = Date.now()
+      await repo.addAnnotation(itemId, annotation, now)
+      setItems((prev) =>
+        prev.map((it) =>
+          it.id === itemId
+            ? { ...it, annotations: [...it.annotations, annotation], updatedAt: now }
+            : it,
+        ),
       )
-      await persist(next)
     },
-    [items, persist],
+    [repo],
   )
 
   const deleteAnnotation = useCallback(
     async (itemId: string, annotationId: string) => {
-      const next = items.map((it) =>
-        it.id === itemId
-          ? {
-              ...it,
-              annotations: it.annotations.filter((a) => a.id !== annotationId),
-              updatedAt: Date.now(),
-            }
-          : it,
+      const now = Date.now()
+      await repo.deleteAnnotation(itemId, annotationId, now)
+      setItems((prev) =>
+        prev.map((it) =>
+          it.id === itemId
+            ? { ...it, annotations: it.annotations.filter((a) => a.id !== annotationId), updatedAt: now }
+            : it,
+        ),
       )
-      await persist(next)
     },
-    [items, persist],
+    [repo],
   )
 
   const addLanguage = useCallback(
     async (name: string) => {
-      const lang: Language = { id: uid(), name }
-      const next = [...languages, lang]
-      setLanguages(next)
-      await db.saveLanguages(next)
+      const lang: Language = { id: crypto.randomUUID(), name }
+      await repo.addLanguage(lang)
+      setLanguages((prev) => [...prev, lang])
       return lang
     },
-    [languages],
+    [repo],
   )
 
   return {

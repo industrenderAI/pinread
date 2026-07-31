@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { Item, Language, User } from '../types/item'
 import { ItemCard } from './ItemCard'
+import { Avatar } from './Avatar'
 
 export function ItemList({
   items,
@@ -54,25 +55,7 @@ export function ItemList({
                   aria-label="Account"
                   className="overflow-hidden rounded-full"
                 >
-                  {user ? (
-                    user.avatar ? (
-                      <img
-                        src={user.avatar}
-                        alt={user.name}
-                        className="h-9 w-9 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-sm font-medium text-ink">
-                        {user.name.slice(0, 1)}
-                      </div>
-                    )
-                  ) : (
-                    <img
-                      src="/icons/profile.svg"
-                      alt="default_avatar"
-                      className="h-9 w-9 rounded-full bg-paper-card"
-                    />
-                  )}
+                  <Avatar user={user} size="sm" />
                 </button>
             </div>
 

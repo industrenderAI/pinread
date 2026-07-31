@@ -11,23 +11,36 @@ type View = 'list' | 'new' | 'edit' | 'detail' | 'profile'
 
 function App() {
   const {
+    user,
+    loading: authLoading,
+    signUpWithPassword,
+    signInWithPassword,
+    sendOtp,
+    verifyOtp,
+    signInWithGoogle,
+    logout,
+  } = useAuth()
+
+  const {
     items,
     languages,
-    loading,
+    loading: itemsLoading,
     addItem,
     updateItem,
     deleteItem,
     addAnnotation,
     deleteAnnotation,
     addLanguage,
-  } = useItems()
+  } = useItems(user?.id ?? null)
+
   const { theme, toggleTheme } = useTheme()
-  const { user, login, logout } = useAuth()
 
   const [view, setView] = useState<View>('list')
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  if (loading) return null
+  // 先等账号状态确定下来（登录/未登录），确定后才知道该读本地数据还是云端数据，
+  // 避免出现"先按未登录渲染一次，登录信息回来后又整个刷新"的闪烁。
+  if (authLoading || itemsLoading) return null
 
   const selected = items.find((it) => it.id === selectedId) ?? null
 
@@ -50,8 +63,12 @@ function App() {
         <ProfilePage
           user={user}
           onBack={() => setView('list')}
-          onLogin={(name) => login(name)}
           onLogout={() => logout()}
+          onSignUpWithPassword={signUpWithPassword}
+          onSignInWithPassword={signInWithPassword}
+          onSendOtp={sendOtp}
+          onVerifyOtp={verifyOtp}
+          onSignInWithGoogle={signInWithGoogle}
         />
       )}
 

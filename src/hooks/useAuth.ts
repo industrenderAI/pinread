@@ -1,43 +1,116 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import type { Session } from '@supabase/supabase-js'
+import { supabase } from '../lib/supabaseClient'
 import type { User } from '../types/item'
 
-/**
- * 这是一个本地模拟的登录状态，没有真正的服务器和密码校验，
- * 只是先把"登录/未登录"这个状态跑通。以后接入真正的账号系统
- * （比如 Supabase Auth）时，把这个 hook 的实现换掉即可，
- * login/logout 的调用方式（组件那边的代码）不用变。
- */
+/** 把 Supabase 的 session 转换成组件用的 User（顺便去 profiles 表拿昵称/头像）。 */
+async function sessionToUser(session: Session | null): Promise<User | null> {
+  const authUser = session?.user
+  if (!authUser) return null
 
-const KEY = 'pinread:user'
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('name, avatar')
+    .eq('id', authUser.id)
+    .maybeSingle()
 
-function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
-}
-
-function loadUser(): User | null {
-  try {
-    const raw = localStorage.getItem(KEY)
-    return raw ? (JSON.parse(raw) as User) : null
-  } catch {
-    return null
+  return {
+    id: authUser.id,
+    email: authUser.email ?? '',
+    name: profile?.name || authUser.email?.split('@')[0] || '用户',
+    avatar: profile?.avatar ?? undefined,
   }
 }
 
+type AuthResult = { error: string | null }
+
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(loadUser)
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const login = useCallback((name: string) => {
-    const trimmed = name.trim()
-    if (!trimmed) return
-    const next: User = { id: uid(), name: trimmed }
-    localStorage.setItem(KEY, JSON.stringify(next))
-    setUser(next)
+  useEffect(() => {
+    let cancelled = false
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const nextUser = await sessionToUser(session)
+      if (cancelled) return
+      setUser(nextUser)
+      setLoading(false)
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const nextUser = await sessionToUser(session)
+      if (cancelled) return
+      setUser(nextUser)
+      setLoading(false)
+    })
+
+    return () => {
+      cancelled = true
+      subscription.unsubscribe()
+    }
   }, [])
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(KEY)
-    setUser(null)
+  /** 邮箱 + 密码注册 */
+  const signUpWithPassword = useCallback(
+    async (email: string, password: string, name: string): Promise<AuthResult> => {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { name: name.trim() || email.split('@')[0] } },
+      })
+      return { error: error?.message ?? null }
+    },
+    [],
+  )
+
+  /** 邮箱 + 密码登录 */
+  const signInWithPassword = useCallback(
+    async (email: string, password: string): Promise<AuthResult> => {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      return { error: error?.message ?? null }
+    },
+    [],
+  )
+
+  /** 发送邮箱验证码（6 位数字，需要在 Supabase 后台把邮件模板改成包含 {{ .Token }}） */
+  const sendOtp = useCallback(async (email: string): Promise<AuthResult> => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: true },
+    })
+    return { error: error?.message ?? null }
   }, [])
 
-  return { user, login, logout }
+  /** 校验刚才发送的邮箱验证码，成功后即登录/注册完成 */
+  const verifyOtp = useCallback(async (email: string, token: string): Promise<AuthResult> => {
+    const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' })
+    return { error: error?.message ?? null }
+  }, [])
+
+  /** Google 第三方登录，会整页跳转到 Google，登录完成后跳回来 */
+  const signInWithGoogle = useCallback(async (): Promise<AuthResult> => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    })
+    return { error: error?.message ?? null }
+  }, [])
+
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut()
+  }, [])
+
+  return {
+    user,
+    loading,
+    signUpWithPassword,
+    signInWithPassword,
+    sendOtp,
+    verifyOtp,
+    signInWithGoogle,
+    logout,
+  }
 }
