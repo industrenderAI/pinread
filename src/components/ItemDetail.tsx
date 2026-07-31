@@ -153,7 +153,7 @@ export function ItemDetail({
                <img 
                src="/icons/back.svg" alt="" 
                className="h-5 w-5" />
-               <p>BACKS</p>
+               <p>返回</p>
                </div>
         </button>
         <button

@@ -54,11 +54,25 @@ export function ItemList({
                   aria-label="Account"
                   className="overflow-hidden rounded-full"
                 >
-                  <img
-                    src={user?.avatar ?? '/icons/profile.svg'}
-                    alt="Profile"
-                    className="h-9 w-9 rounded-full object-cover"
-                  />
+                  {user ? (
+                    user.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={user.name}
+                        className="h-9 w-9 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-sm font-medium text-ink">
+                        {user.name.slice(0, 1)}
+                      </div>
+                    )
+                  ) : (
+                    <img
+                      src="/icons/profile.svg"
+                      alt="default_avatar"
+                      className="h-9 w-9 rounded-full bg-paper-card"
+                    />
+                  )}
                 </button>
             </div>
 
