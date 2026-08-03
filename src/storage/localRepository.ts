@@ -32,22 +32,42 @@ export const localRepository: Repository = {
   },
 
   async addItem(item) {
-    writeItems([...readItems(), item])
+    writeItems([
+      ...readItems(),
+      item,
+    ])
   },
 
   async updateItem(id, patch) {
-    writeItems(readItems().map((it) => (it.id === id ? { ...it, ...patch } : it)))
+    writeItems(
+      readItems().map((it) =>
+        it.id === id
+          ? { ...it, ...patch }
+          : it,
+      ),
+    )
   },
 
   async deleteItem(id) {
-    writeItems(readItems().filter((it) => it.id !== id))
+    writeItems(
+      readItems().filter(
+        (it) => it.id !== id,
+      ),
+    )
   },
 
   async addAnnotation(itemId, annotation, updatedAt) {
     writeItems(
       readItems().map((it) =>
         it.id === itemId
-          ? { ...it, annotations: [...it.annotations, annotation], updatedAt }
+          ? {
+              ...it,
+              annotations: [
+                ...it.annotations,
+                annotation,
+              ],
+              updatedAt,
+            }
           : it,
       ),
     )
@@ -57,27 +77,46 @@ export const localRepository: Repository = {
     writeItems(
       readItems().map((it) =>
         it.id === itemId
-          ? { ...it, annotations: it.annotations.filter((a) => a.id !== annotationId), updatedAt }
+          ? {
+              ...it,
+              annotations: it.annotations.filter(
+                (a) => a.id !== annotationId,
+              ),
+              updatedAt,
+            }
           : it,
       ),
     )
   },
 
   async addCategory(category) {
-    writeCategories([...(readCategories() ?? []), category])
+    writeCategories([
+      ...(readCategories() ?? []),
+      category,
+    ])
+
+    // 返回新创建的分类
+    return category
   },
 
   async updateCategory(id, name) {
     writeCategories(
       (readCategories() ?? []).map((category) =>
-        category.id === id ? { ...category, name } : category,
+        category.id === id
+          ? {
+              ...category,
+              name,
+            }
+          : category,
       ),
     )
   },
 
   async deleteCategory(id) {
     writeCategories(
-      (readCategories() ?? []).filter((category) => category.id !== id),
+      (readCategories() ?? []).filter(
+        (category) => category.id !== id,
+      ),
     )
   },
 }

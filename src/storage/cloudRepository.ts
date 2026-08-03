@@ -166,6 +166,8 @@ export function createCloudRepository(userId: string): Repository {
         })
 
       if (error) throw error
+
+      return category
     },
 
     async updateCategory(id, name) {

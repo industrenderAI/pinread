@@ -89,7 +89,7 @@ export function ItemCard({
           <span className="text-xs font-medium text-ink">{formatDate(item.updatedAt)}</span>
           <div className="flex items-center gap-1.5 ">
             <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[11px] text-accent-text font-medium">
-              {item.language}
+              {item.category}
             </span>
             {item.annotations.length > 0 && (
               <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[11px] text-accent-text font-medium">

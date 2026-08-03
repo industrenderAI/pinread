@@ -1,7 +1,32 @@
 import type { User } from '../types/item'
 import { Avatar } from './Avatar'
 
-const MENU_ITEMS = ['账号', '同步',  '分类管理','系统语言', '帮助', '关于']
+const MENU_ITEMS = [
+  {
+    label:'账号',
+    action:'account',
+  },
+  {
+    label:'同步',
+    action:'sync',
+  },
+  {
+    label:'分类管理',
+    action:'category',
+  },
+  {
+    label:'系统语言',
+    action:'language',
+  },
+  {
+    label:'帮助',
+    action:'help',
+  },
+  {
+    label:'关于',
+    action:'about',
+  },
+]
 
 function ChevronRight() {
   return (
@@ -24,11 +49,13 @@ export function ProfilePage({
   onBack,
   onLogout,
   onLoginClick,
+  onCategoryClick,
 }: {
   user: User | null
   onBack: () => void
   onLogout: () => void
   onLoginClick: () => void
+  onCategoryClick: () => void
 }) {
   return (
     <div className="fixed inset-0 z-20 mx-auto flex max-w-lg flex-col bg-paper">
@@ -63,12 +90,17 @@ export function ProfilePage({
         )}
 
         <div className="mt-8 flex flex-col divide-y divide-line border-t border-b border-line">
-          {MENU_ITEMS.map((label) => (
+          {MENU_ITEMS.map((item) => (
             <button
-              key={label}
+              key={item.action}
+              onClick={() => {
+                if (item.action === 'category') {
+                  onCategoryClick()
+                }
+              }}
               className="flex items-center justify-between py-3.5 text-left text-sm text-ink"
             >
-              <span>{label}</span>
+              <span>{item.label}</span>
               <ChevronRight />
             </button>
           ))}

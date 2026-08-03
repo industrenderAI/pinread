@@ -44,29 +44,52 @@ export function useItems(userId: string | null) {
     }
   }, [userId, repo])
 
+const addItem = useCallback(
+  async (
+    content: string,
+    source: string,
+    categoryName: string,
+  ) => {
+    const now = Date.now()
 
-  const addItem = useCallback(
-    async (content: string, source: string, category: string) => {
-      const now = Date.now()
+    let category = categories.find(
+      (c) => c.name === categoryName,
+    )
 
-      const item: Item = {
+    // 创建笔记时输入了新分类
+    if (!category) {
+      category = await repo.addCategory({
         id: crypto.randomUUID(),
-        content,
-        source,
-        category,
-        createdAt: now,
-        updatedAt: now,
-        annotations: [],
-      }
+        name: categoryName,
+      })
 
-      await repo.addItem(item)
+      setCategories((prev) => [
+        ...prev,
+        category!,
+      ])
+    }
 
-      setItems((prev) => [item, ...prev])
+    const item: Item = {
+      id: crypto.randomUUID(),
+      content,
+      source,
+      category: category.name,
+      createdAt: now,
+      updatedAt: now,
+      annotations: [],
+    }
 
-      return item
-    },
-    [repo],
-  )
+    await repo.addItem(item)
+
+    setItems((prev) => [
+      item,
+      ...prev,
+    ])
+
+    return item
+  },
+  [repo, categories],
+)
 
 
   const updateItem = useCallback(

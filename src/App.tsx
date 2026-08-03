@@ -7,8 +7,16 @@ import { NewItemSheet } from './components/NewItemSheet'
 import { ItemDetail } from './components/ItemDetail'
 import { ProfilePage } from './components/ProfilePage'
 import { LoginPage } from './components/LoginPage'
+import { CategoryManagePage } from './components/CategoryManagePage'
 
-type View = 'list' | 'new' | 'edit' | 'detail' | 'profile' | 'login'
+type View =
+  | 'list'
+  | 'new'
+  | 'edit'
+  | 'detail'
+  | 'profile'
+  | 'login'
+  | 'categories'
 
 function App() {
   const {
@@ -24,41 +32,57 @@ function App() {
 
   const {
     items,
-    languages,
+    categories,
     loading: itemsLoading,
+
     addItem,
     updateItem,
     deleteItem,
+
     addAnnotation,
     deleteAnnotation,
-    addLanguage,
+
+    addCategory,
+    updateCategory,
+    deleteCategory,
+
   } = useItems(user?.id ?? null)
 
   const { theme, toggleTheme } = useTheme()
 
-  const [view, setView] = useState<View>('list')
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+const [view, setView] = useState<View>('list')
+const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  // 先等账号状态确定下来（登录/未登录），确定后才知道该读本地数据还是云端数据，
-  // 避免出现"先按未登录渲染一次，登录信息回来后又整个刷新"的闪烁。
-  if (authLoading || itemsLoading) return null
+if (authLoading || itemsLoading) return null
 
-  const selected = items.find((it) => it.id === selectedId) ?? null
+const usedCategories = categories.filter(category =>
+  items.some(item => item.category === category.name)
+)
+
+const selected = items.find((it) => it.id === selectedId) ?? null
 
   return (
     <>
       <ItemList
         items={items}
-        languages={languages}
+        categories={usedCategories}
         user={user}
         onOpen={(id) => {
           setSelectedId(id)
           setView('detail')
         }}
-        onNew={() => setView('new')}
+        // onNew={() => setView('new')}
+        onNew={() => {
+          if (!user) {
+            setView('login')
+            return
+          }
+          setView('new')
+        }}
         onDelete={(id) => deleteItem(id)}
         onProfileClick={() => setView('profile')}
       />
+
 
       {view === 'profile' && (
         <ProfilePage
@@ -66,8 +90,10 @@ function App() {
           onBack={() => setView('list')}
           onLogout={() => logout()}
           onLoginClick={() => setView('login')}
+          onCategoryClick={() => setView('categories')}
         />
       )}
+
 
       {view === 'login' && (
         <LoginPage
@@ -81,32 +107,43 @@ function App() {
         />
       )}
 
+
       {view === 'new' && (
         <NewItemSheet
-          languages={languages}
+          categories={categories}
           onCancel={() => setView('list')}
-          onAddLanguage={addLanguage}
-          onSave={async (content, source, language) => {
-            const item = await addItem(content, source, language)
+          onAddCategory={addCategory}
+          onSave={async (content, source, category) => {
+            const item = await addItem(content, source, category)
             setSelectedId(item.id)
             setView('detail')
           }}
         />
       )}
 
+
       {view === 'edit' && selected && (
         <NewItemSheet
-          languages={languages}
-          initial={{ content: selected.content, source: selected.source, language: selected.language }}
+          categories={categories}
+          initial={{
+            content: selected.content,
+            source: selected.source,
+            category: selected.category,
+          }}
           onCancel={() => setView('detail')}
-          onAddLanguage={addLanguage}
-          onSave={async (content, source, language) => {
-            await updateItem(selected.id, content, source, language)
+          onAddCategory={addCategory}
+          onSave={async (content, source, category) => {
+            await updateItem(
+              selected.id,
+              content,
+              source,
+              category
+            )
             setView('detail')
           }}
         />
       )}
-
+      
       {view === 'detail' && selected && (
         <ItemDetail
           item={selected}
@@ -114,8 +151,22 @@ function App() {
           onBack={() => setView('list')}
           onEdit={() => setView('edit')}
           onToggleTheme={toggleTheme}
-          onAddAnnotation={(start, end, note) => addAnnotation(selected.id, start, end, note)}
-          onDeleteAnnotation={(annotationId) => deleteAnnotation(selected.id, annotationId)}
+          onAddAnnotation={(start, end, note) =>
+            addAnnotation(selected.id, start, end, note)
+          }
+          onDeleteAnnotation={(annotationId) =>
+            deleteAnnotation(selected.id, annotationId)
+          }
+        />
+      )}
+
+      {view === 'categories' && (
+        <CategoryManagePage
+          categories={categories}
+          onBack={() => setView('profile')}
+          onAdd={addCategory}
+          onUpdate={updateCategory}
+          onDelete={deleteCategory}
         />
       )}
     </>
