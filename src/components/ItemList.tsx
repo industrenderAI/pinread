@@ -138,6 +138,19 @@ export function ItemList({
 
                 ))}
 
+              {items.some((it) => it.category === '') && (
+                <button
+                  onClick={() => setCategoryFilter('')}
+                  className={`shrink-0 rounded-full px-3 py-1 text-xs ${
+                    categoryFilter === ''
+                      ? 'bg-accent text-on-accent'
+                      : 'border border-line bg-paper-card text-ink-soft'
+                  }`}
+                >
+                  未分类
+                </button>
+              )}
+
             </div>
 
           )}

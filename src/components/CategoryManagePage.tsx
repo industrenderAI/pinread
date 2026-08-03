@@ -1,15 +1,17 @@
 import { useState } from 'react'
-import type { Category } from '../types/item'
+import type { Category, Item } from '../types/item'
 
 
 export function CategoryManagePage({
   categories,
+  items,
   onBack,
   onAdd,
   onUpdate,
   onDelete,
 }: {
   categories: Category[]
+  items: Item[]
   onBack: () => void
   onAdd: (name:string)=>Promise<Category>
   onUpdate: (id:string,name:string)=>Promise<void>
@@ -79,15 +81,9 @@ export function CategoryManagePage({
               setNewName('')
 
             }}
-            className="
-              rounded-lg
-              bg-accent
-              px-4
-              text-sm
-              text-on-accent
-            "
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-2xl leading-none text-on-accent"
           >
-            添加
+            +
           </button>
 
         </div>
@@ -99,10 +95,11 @@ export function CategoryManagePage({
 
         {
           categories.map((c)=>(
-            
+
             <CategoryRow
               key={c.id}
               category={c}
+              itemCount={items.filter((it) => it.category === c.name).length}
               onUpdate={onUpdate}
               onDelete={onDelete}
             />
@@ -127,10 +124,12 @@ export function CategoryManagePage({
 
 function CategoryRow({
  category,
+ itemCount,
  onUpdate,
  onDelete
 }:{
  category:Category
+ itemCount:number
  onUpdate:(id:string,name:string)=>Promise<void>
  onDelete:(id:string)=>Promise<void>
 }){
@@ -138,11 +137,15 @@ function CategoryRow({
 
  const [edit,setEdit]=useState(false)
  const [name,setName]=useState(category.name)
+ const [confirmDelete,setConfirmDelete]=useState(false)
+ const [deleting,setDeleting]=useState(false)
 
 
  return (
 
-<div className="flex items-center justify-between py-3">
+<div className="py-3">
+
+<div className="flex items-center justify-between">
 
 
 {
@@ -194,7 +197,14 @@ setEdit(!edit)
 
 
 <button
-onClick={()=>onDelete(category.id)}
+onClick={()=>{
+  // 没有笔记在用，直接删；有笔记在用，先弹确认
+  if (itemCount === 0) {
+    onDelete(category.id)
+    return
+  }
+  setConfirmDelete(true)
+}}
 >
 删除
 </button>
@@ -202,6 +212,36 @@ onClick={()=>onDelete(category.id)}
 
 </div>
 
+</div>
+
+
+{confirmDelete && (
+  <div className="mt-2 rounded-lg border border-danger/40 p-3">
+    <p className="text-xs text-ink">
+      「{category.name}」下有 {itemCount} 篇笔记，删除分类后这些笔记会自动移到"未分类"，笔记本身不会被删除。
+    </p>
+    <div className="mt-2 flex gap-2">
+      <button
+        onClick={() => setConfirmDelete(false)}
+        className="h-8 flex-1 rounded-full border border-line text-xs text-ink"
+      >
+        取消
+      </button>
+      <button
+        disabled={deleting}
+        onClick={async () => {
+          setDeleting(true)
+          await onDelete(category.id)
+          setDeleting(false)
+          setConfirmDelete(false)
+        }}
+        className="h-8 flex-1 rounded-full bg-danger text-xs text-paper disabled:opacity-50"
+      >
+        确认删除
+      </button>
+    </div>
+  </div>
+)}
 
 </div>
 

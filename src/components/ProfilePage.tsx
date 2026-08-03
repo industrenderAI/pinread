@@ -44,27 +44,30 @@ function ChevronRight() {
   )
 }
 
-export function ProfilePage({
-  user,
-  onBack,
-  onLogout,
-  onLoginClick,
-  onCategoryClick,
-}: {
-  user: User | null
-  onBack: () => void
-  onLogout: () => void
-  onLoginClick: () => void
-  onCategoryClick: () => void
-}) {
+  export function ProfilePage({
+    user,
+    onBack,
+    onLogout,
+    onLoginClick,
+    onCategoryClick,
+    onAccountClick,
+  }: {
+    user: User | null
+    onBack: () => void
+    onLogout: () => void
+    onLoginClick: () => void
+    onCategoryClick: () => void
+    onAccountClick: () => void
+  }) {
+
   return (
     <div className="fixed inset-0 z-20 mx-auto flex max-w-lg flex-col bg-paper">
-      <div className="relative flex items-center border-b border-line px-4 py-3.5">
-        <button onClick={onBack} className="text-[15px] text-accent-text">
-          <img src="/icons/back.svg" alt="PinRead_Return" className="h-4 w-auto" />
+      <div className="relative flex items-center px-4 py-5">
+        <button onClick={onBack}>
+          <img src="/icons/back.svg" alt="Return to home" className="h-4 w-4" />
         </button>
         <div className="absolute left-1/2 -translate-x-1/2">
-          <span className="text-base font-medium">个人中心</span>
+          <span className="text-base font-bold">个人中心</span>
         </div>
       </div>
 
@@ -82,14 +85,14 @@ export function ProfilePage({
             <Avatar user={null} size="md" />
             <button
               onClick={onLoginClick}
-              className="h-8 shrink-0 rounded-full bg-ink px-4 text-xs font-medium text-paper"
+              className="h-8 shrink-0 rounded-full bg-ink px-4 text-xs font-bold text-paper"
             >
               点击登录
             </button>
           </div>
         )}
 
-        <div className="mt-8 flex flex-col divide-y divide-line border-t border-b border-line">
+        <div className="mt-10 flex flex-col divide-y divide-line border-t border-b border-line">
           {MENU_ITEMS.map((item) => (
             <button
               key={item.action}
@@ -97,8 +100,15 @@ export function ProfilePage({
                 if (item.action === 'category') {
                   onCategoryClick()
                 }
+                if (item.action === 'account') {
+                  if (!user) {
+                    onLoginClick()
+                    return
+                  }
+                  onAccountClick()
+                }
               }}
-              className="flex items-center justify-between py-3.5 text-left text-sm text-ink"
+              className="flex items-center justify-between py-5 text-left text-base text-ink font-bold"
             >
               <span>{item.label}</span>
               <ChevronRight />

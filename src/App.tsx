@@ -8,6 +8,7 @@ import { ItemDetail } from './components/ItemDetail'
 import { ProfilePage } from './components/ProfilePage'
 import { LoginPage } from './components/LoginPage'
 import { CategoryManagePage } from './components/CategoryManagePage'
+import { AccountPage } from './components/AccountPage'
 
 type View =
   | 'list'
@@ -17,6 +18,7 @@ type View =
   | 'profile'
   | 'login'
   | 'categories'
+  | 'account'
 
 function App() {
   const {
@@ -28,6 +30,10 @@ function App() {
     verifyOtp,
     signInWithGoogle,
     logout,
+    updateName,
+    updateEmail,
+    updatePassword,
+    deleteAccount,
   } = useAuth()
 
   const {
@@ -90,10 +96,20 @@ const selected = items.find((it) => it.id === selectedId) ?? null
           onBack={() => setView('list')}
           onLogout={() => logout()}
           onLoginClick={() => setView('login')}
-          onCategoryClick={() => setView('categories')}
-        />
-      )}
-
+                    onCategoryClick={() => setView('categories')}
+                    onAccountClick={() => setView('account')}
+                  />
+                )}
+                {view === 'account' && (
+                  <AccountPage
+                    user={user}
+                    onBack={() => setView('profile')}
+                    onUpdateName={updateName}
+                    onUpdateEmail={updateEmail}
+                    onUpdatePassword={updatePassword}
+                    onDeleteAccount={deleteAccount}
+                  />
+                )}
 
       {view === 'login' && (
         <LoginPage
@@ -160,15 +176,16 @@ const selected = items.find((it) => it.id === selectedId) ?? null
         />
       )}
 
-      {view === 'categories' && (
-        <CategoryManagePage
-          categories={categories}
-          onBack={() => setView('profile')}
-          onAdd={addCategory}
-          onUpdate={updateCategory}
-          onDelete={deleteCategory}
-        />
-      )}
+    {view === 'categories' && (
+            <CategoryManagePage
+              categories={categories}
+              items={items}
+              onBack={() => setView('profile')}
+              onAdd={addCategory}
+              onUpdate={updateCategory}
+              onDelete={deleteCategory}
+            />
+          )}
     </>
   )
 }

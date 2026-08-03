@@ -151,9 +151,8 @@ export function ItemDetail({
         <button onClick={onBack} className="text-[15px] text-accent-text">
               <div  className='flex justify-between gap-2.5'>
                <img 
-               src="/icons/back.svg" alt="" 
-               className="h-5 w-5" />
-               <p>返回</p>
+               src="/icons/back.svg" alt="Return to home" 
+               className="h-4 w-auto" />
                </div>
         </button>
         <button

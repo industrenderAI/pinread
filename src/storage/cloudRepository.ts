@@ -189,5 +189,15 @@ export function createCloudRepository(userId: string): Repository {
 
       if (error) throw error
     },
+
+    async renameItemsCategory(oldName, newName) {
+      const { error } = await supabase
+        .from('items')
+        .update({ category: newName })
+        .eq('user_id', userId)
+        .eq('category', oldName)
+
+      if (error) throw error
+    },
   }
 }

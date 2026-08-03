@@ -248,7 +248,23 @@ const addItem = useCallback(
 
   const updateCategory = useCallback(
     async (id: string, name: string) => {
+      const target = categories.find((c) => c.id === id)
+
       await repo.updateCategory(id, name)
+
+      // 分类改名后，同步把用这个旧名字的笔记也改成新名字，
+      // 不然这些笔记会跟改完名的分类"失联"。
+      if (target && target.name !== name) {
+        await repo.renameItemsCategory(target.name, name)
+
+        setItems((prev) =>
+          prev.map((it) =>
+            it.category === target.name
+              ? { ...it, category: name }
+              : it,
+          ),
+        )
+      }
 
       setCategories((prev) =>
         prev.map((item) =>
@@ -258,19 +274,35 @@ const addItem = useCallback(
         ),
       )
     },
-    [repo],
+    [repo, categories],
   )
 
 
   const deleteCategory = useCallback(
     async (id: string) => {
+      const target = categories.find((c) => c.id === id)
+
       await repo.deleteCategory(id)
+
+      // 分类被删掉后，把用这个分类的笔记安全移到"未分类"（category 设为空字符串），
+      // 而不是让笔记留着一个已经不存在的分类名。
+      if (target) {
+        await repo.renameItemsCategory(target.name, '')
+
+        setItems((prev) =>
+          prev.map((it) =>
+            it.category === target.name
+              ? { ...it, category: '' }
+              : it,
+          ),
+        )
+      }
 
       setCategories((prev) =>
         prev.filter((item) => item.id !== id),
       )
     },
-    [repo],
+    [repo, categories],
   )
 
 

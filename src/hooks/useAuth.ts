@@ -103,14 +103,62 @@ export function useAuth() {
     await supabase.auth.signOut()
   }, [])
 
+  /** 修改昵称：只改 profiles 表，不涉及 auth.users，改完立刻同步到本地 user 状态 */
+  const updateName = useCallback(async (name: string): Promise<AuthResult> => {
+    const trimmed = name.trim()
+    if (!trimmed) return { error: '用户名不能为空' }
+
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser()
+    if (!authUser) return { error: '请先登录' }
+
+    const { error } = await supabase.from('profiles').update({ name: trimmed }).eq('id', authUser.id)
+    if (error) return { error: error.message }
+
+    setUser((u) => (u ? { ...u, name: trimmed } : u))
+    return { error: null }
+  }, [])
+
+  /**
+   * 更换邮箱：Supabase 会分别给旧邮箱和新邮箱发确认信，
+   * 都点击确认后邮箱才会真正切换，这里只是发起请求。
+   */
+  const updateEmail = useCallback(async (email: string): Promise<AuthResult> => {
+    const trimmed = email.trim()
+    if (!trimmed) return { error: '请输入新邮箱' }
+
+    const { error } = await supabase.auth.updateUser({ email: trimmed })
+    return { error: error?.message ?? null }
+  }, [])
+
+  /** 修改密码：已登录状态下直接设置新密码，不需要验证旧密码 */
+  const updatePassword = useCallback(async (password: string): Promise<AuthResult> => {
+    const { error } = await supabase.auth.updateUser({ password })
+    return { error: error?.message ?? null }
+  }, [])
+
+  /**
+   * 注销账号：真正删除用户必须用 service_role 权限调用，
+   * 这个密钥不能出现在前端浏览器代码里（会被任何人看到），
+   * 所以这里先占位，等后端（Supabase Edge Function）接口就绪后再对接。
+   */
+  const deleteAccount = useCallback(async (): Promise<AuthResult> => {
+    return { error: '注销账号功能正在开发中，暂未开放' }
+  }, [])
+
   return {
-    user,
-    loading,
-    signUpWithPassword,
-    signInWithPassword,
-    sendOtp,
-    verifyOtp,
-    signInWithGoogle,
-    logout,
+      user,
+      loading,
+      signUpWithPassword,
+      signInWithPassword,
+      sendOtp,
+      verifyOtp,
+      signInWithGoogle,
+      logout,
+      updateName,
+      updateEmail,
+      updatePassword,
+      deleteAccount,
+    }
   }
-}

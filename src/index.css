@@ -69,6 +69,7 @@ body {
   background: var(--color-paper);
   color: var(--color-ink);
   transition: background-color .15s ease, color .15s ease;
+  touch-action: manipulation;
 }
 
 .ann {

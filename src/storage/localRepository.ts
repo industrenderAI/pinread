@@ -119,4 +119,14 @@ export const localRepository: Repository = {
       ),
     )
   },
+
+  async renameItemsCategory(oldName, newName) {
+    writeItems(
+      readItems().map((it) =>
+        it.category === oldName
+          ? { ...it, category: newName }
+          : it,
+      ),
+    )
+  },
 }
