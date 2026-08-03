@@ -1,7 +1,7 @@
 import type { User } from '../types/item'
 import { Avatar } from './Avatar'
 
-const MENU_ITEMS = ['账号', '同步',  '分类','系统语言', '帮助', '关于']
+const MENU_ITEMS = ['账号', '同步',  '分类管理','系统语言', '帮助', '关于']
 
 function ChevronRight() {
   return (
