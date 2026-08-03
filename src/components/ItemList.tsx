@@ -60,13 +60,42 @@ export function ItemList({
           </div>
 
 
-          <button
-            onClick={onProfileClick}
-            aria-label="Account"
-            className="overflow-hidden rounded-full"
-          >
-            <Avatar user={user} size="sm" />
-          </button>
+          <div className="flex items-center gap-3">
+
+            <button
+              onClick={() => {
+                if (searchOpen) {
+                  setSearchOpen(false)
+                  setQuery('')
+                } else {
+                  setSearchOpen(true)
+                }
+              }}
+              aria-label="搜索"
+              className="flex h-9 w-9 shrink-0 items-center justify-center"
+            >
+
+              <img
+                src={
+                  searchOpen
+                    ? '/icons/close.svg'
+                    : '/icons/search.svg'
+                }
+                alt=""
+                className="h-5 w-5"
+              />
+
+            </button>
+
+            <button
+              onClick={onProfileClick}
+              aria-label="Account"
+              className="overflow-hidden rounded-full"
+            >
+              <Avatar user={user} size="sm" />
+            </button>
+
+          </div>
 
         </div>
 
@@ -154,33 +183,6 @@ export function ItemList({
             </div>
 
           )}
-
-
-
-          <button
-            onClick={() => {
-              if (searchOpen) {
-                setSearchOpen(false)
-                setQuery('')
-              } else {
-                setSearchOpen(true)
-              }
-            }}
-            className="flex h-9 w-9 shrink-0 items-center justify-center"
-          >
-
-            <img
-              src={
-                searchOpen
-                  ? '/icons/close.svg'
-                  : '/icons/search.svg'
-              }
-              alt=""
-              className="h-5 w-5"
-            />
-
-          </button>
-
 
         </div>
 

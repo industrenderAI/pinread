@@ -50,11 +50,11 @@ function SettingRow({
   children: React.ReactNode
 }) {
   return (
-    <div className="border-b border-line py-4">
+    <div className="py-5">
       <button onClick={onToggle} className="flex w-full items-center justify-between text-left">
         <div className="min-w-0">
-          <p className="text-base font-bold  text-ink">{label}</p>
-          {value && <p className="mt-0.5 truncate text-xs text-ink-faint">{value}</p>}
+          <p className="text-lg font-bold  text-ink">{label}</p>
+          {value && <p className="mt-0.5 truncate text-sm text-ink-faint">{value}</p>}
         </div>
         <div className={`shrink-0 transition-transform ${expanded ? 'rotate-90' : ''}`}>
           <ChevronRight />
@@ -203,7 +203,7 @@ export function AccountPage({
           />
         </button>
         <div className="absolute left-1/2 -translate-x-1/2">
-          <span className="text-base font-bold">账户管理</span>
+          <span className="text-lg font-bold">账户管理</span>
         </div>
       </div>
 

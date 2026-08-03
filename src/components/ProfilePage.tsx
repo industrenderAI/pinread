@@ -65,7 +65,7 @@ function ChevronRight() {
       <div className="relative flex items-center px-4 py-5">
         <button
           onClick={onBack}
-          aria-label="返回"
+          aria-label="Return"
           className="-m-3.5 flex items-center justify-center p-4 text-accent-text"
         >
           <img
@@ -76,13 +76,13 @@ function ChevronRight() {
         </button>
 
         <div className="absolute left-1/2 -translate-x-1/2">
-          <span className="text-base font-bold">个人中心</span>
+          <span className="text-lg font-bold">个人中心</span>
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col overflow-y-auto px-5 pt-6">
+      <div className="flex flex-1 flex-col overflow-y-auto px-5 pt-4">
         {user ? (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-5">
             <Avatar user={user} size="md" />
             <div className="min-w-0">
               <p className="truncate text-lg font-bold text-ink">{user.name}</p>
@@ -101,7 +101,7 @@ function ChevronRight() {
           </div>
         )}
 
-        <div className="mt-10 flex flex-col">
+        <div className="mt-6 flex flex-col">
           {MENU_ITEMS.map((item) => (
             <button
               key={item.action}
@@ -117,7 +117,7 @@ function ChevronRight() {
                   onAccountClick()
                 }
               }}
-              className="flex items-center justify-between py-5 text-left text-base text-ink font-bold"
+              className="flex items-center justify-between py-5 text-left text-lg text-ink font-bold"
             >
               <span>{item.label}</span>
               <ChevronRight />

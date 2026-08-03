@@ -1,7 +1,7 @@
 import type { User } from '../types/item'
 
 export function Avatar({ user, size = 'md' }: { user: User | null; size?: 'sm' | 'md' }) {
-  const dimension = size === 'sm' ? 'h-9 w-9' : 'h-12 w-12'
+  const dimension = size === 'sm' ? 'h-10 w-10' : 'h-14 w-14'
 
   if (!user) {
     return (
