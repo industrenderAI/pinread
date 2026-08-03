@@ -1,5 +1,6 @@
 import { localRepository } from './localRepository'
 import { createCloudRepository } from './cloudRepository'
+import { uuid } from '../lib/uuid'
 
 function migrationFlagKey(userId: string) {
   return `pinread:migrated:${userId}`
@@ -34,7 +35,7 @@ export async function migrateLocalToCloud(userId: string): Promise<void> {
 
   if (existingCloudItems.length === 0) {
     for (const item of localItems) {
-      await cloudRepo.addItem({ ...item, id: crypto.randomUUID() })
+      await cloudRepo.addItem({ ...item, id: uuid() })
     }
   }
 
@@ -44,7 +45,7 @@ export async function migrateLocalToCloud(userId: string): Promise<void> {
   for (const category of localCategories) {
     if (!existingNames.has(category.name)) {
       await cloudRepo.addCategory({
-        id: crypto.randomUUID(),
+        id: uuid(),
         name: category.name,
       })
 

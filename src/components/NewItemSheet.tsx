@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Category } from '../types/item'
+import { CategoryPickerField, CategoryPickerSheet } from './CategoryPickerSheet'
 
 export function NewItemSheet({
   categories,
@@ -22,8 +23,7 @@ export function NewItemSheet({
     initial?.category ?? categories[0]?.name ?? ''
   )
 
-  const [addingCategory, setAddingCategory] = useState(false)
-  const [newCategoryName, setNewCategoryName] = useState('')
+  const [pickerOpen, setPickerOpen] = useState(false)
 
 
   const handleSave = () => {
@@ -37,19 +37,6 @@ export function NewItemSheet({
       source.trim(),
       category || '未分类'
     )
-  }
-
-
-  const handleAddCategory = async () => {
-    const name = newCategoryName.trim()
-
-    if (!name) return
-
-    const cat = await onAddCategory(name)
-
-    setCategory(cat.name)
-    setNewCategoryName('')
-    setAddingCategory(false)
   }
 
 
@@ -84,58 +71,9 @@ export function NewItemSheet({
           分类
         </p>
 
-
-        <div className="mb-3.5 flex flex-wrap gap-2">
-
-          {categories.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => setCategory(c.name)}
-              className={`rounded-full px-5 py-1.5 text-sm ${
-                category === c.name
-                  ? 'bg-accent text-on-accent'
-                  : 'border border-line bg-paper-card text-ink-soft'
-              }`}
-            >
-              {c.name}
-            </button>
-          ))}
-
-
-          {!addingCategory && (
-            <button
-              onClick={() => setAddingCategory(true)}
-              className="rounded-full border border-dashed border-line px-3 py-1.5 text-sm text-ink-faint"
-            >
-              + 新分类
-            </button>
-          )}
-
+        <div className="mb-3.5">
+          <CategoryPickerField value={category} onOpen={() => setPickerOpen(true)} />
         </div>
-
-
-
-        {addingCategory && (
-          <div className="mb-3.5 flex gap-2">
-
-            <input
-              autoFocus
-              value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
-              placeholder="比如：英语学习"
-              className="h-9 flex-1 rounded-lg border border-line bg-paper-card px-3 text-sm outline-none"
-            />
-
-
-            <button
-              onClick={handleAddCategory}
-              className="rounded-3xl bg-accent px-5 text-sm text-on-accent"
-            >
-              添加
-            </button>
-
-          </div>
-        )}
 
 
 
@@ -173,6 +111,16 @@ export function NewItemSheet({
         )}
 
       </div>
+
+      {pickerOpen && (
+        <CategoryPickerSheet
+          categories={categories}
+          value={category}
+          onSelect={setCategory}
+          onAddCategory={onAddCategory}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
 
     </div>
   )

@@ -191,11 +191,19 @@ export function AccountPage({
   return (
     <div className="fixed inset-0 z-30 mx-auto flex max-w-lg flex-col bg-paper">
       <div className="relative flex items-center px-4 py-5">
-        <button onClick={onBack}>
-          <img src="/icons/back.svg" alt="PinRead_Return" className="h-4 w-auto" />
+        <button
+          onClick={onBack}
+          aria-label="Return"
+          className="-m-3.5 flex items-center justify-center p-4 text-accent-text"
+        >
+          <img
+            src="/icons/back.svg"
+            className="h-auto w-3"
+            alt="Return to previous page"
+          />
         </button>
         <div className="absolute left-1/2 -translate-x-1/2">
-          <span className="text-base font-bold">账号</span>
+          <span className="text-base font-bold">账户管理</span>
         </div>
       </div>
 

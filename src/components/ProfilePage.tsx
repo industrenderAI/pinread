@@ -3,11 +3,11 @@ import { Avatar } from './Avatar'
 
 const MENU_ITEMS = [
   {
-    label:'账号',
+    label:'账户管理',
     action:'account',
   },
   {
-    label:'同步',
+    label:'同步设定',
     action:'sync',
   },
   {
@@ -19,11 +19,11 @@ const MENU_ITEMS = [
     action:'language',
   },
   {
-    label:'帮助',
+    label:'帮助中心',
     action:'help',
   },
   {
-    label:'关于',
+    label:'关于我们',
     action:'about',
   },
 ]
@@ -63,9 +63,18 @@ function ChevronRight() {
   return (
     <div className="fixed inset-0 z-20 mx-auto flex max-w-lg flex-col bg-paper">
       <div className="relative flex items-center px-4 py-5">
-        <button onClick={onBack}>
-          <img src="/icons/back.svg" alt="Return to home" className="h-4 w-4" />
+        <button
+          onClick={onBack}
+          aria-label="返回"
+          className="-m-3.5 flex items-center justify-center p-4 text-accent-text"
+        >
+          <img
+            src="/icons/back.svg"
+            className="w-3 h-auto"
+            alt="Return to previous page"
+          />
         </button>
+
         <div className="absolute left-1/2 -translate-x-1/2">
           <span className="text-base font-bold">个人中心</span>
         </div>
@@ -76,12 +85,12 @@ function ChevronRight() {
           <div className="flex items-center gap-3">
             <Avatar user={user} size="md" />
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-ink">{user.name}</p>
-              <p className="truncate text-xs text-ink-faint">{user.email}</p>
+              <p className="truncate text-lg font-bold text-ink">{user.name}</p>
+              <p className="truncate text-sm text-ink-faint">{user.email}</p>
             </div>
           </div>
         ) : (
-          <div className="flex items-center gap-3">
+          <div className="flex justify-between items-center gap-3">
             <Avatar user={null} size="md" />
             <button
               onClick={onLoginClick}
@@ -92,7 +101,7 @@ function ChevronRight() {
           </div>
         )}
 
-        <div className="mt-10 flex flex-col divide-y divide-line border-t border-b border-line">
+        <div className="mt-10 flex flex-col">
           {MENU_ITEMS.map((item) => (
             <button
               key={item.action}

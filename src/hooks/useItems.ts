@@ -3,6 +3,7 @@ import type { Annotation, Item, Category } from '../types/item'
 import { localRepository } from '../storage/localRepository'
 import { createCloudRepository } from '../storage/cloudRepository'
 import { migrateLocalToCloud } from '../storage/migrateLocalToCloud'
+import { uuid } from '../lib/uuid'
 
 /**
  * userId 为 null：未登录，走本地 localStorage。
@@ -59,7 +60,7 @@ const addItem = useCallback(
     // 创建笔记时输入了新分类
     if (!category) {
       category = await repo.addCategory({
-        id: crypto.randomUUID(),
+        id: uuid(),
         name: categoryName,
       })
 
@@ -70,7 +71,7 @@ const addItem = useCallback(
     }
 
     const item: Item = {
-      id: crypto.randomUUID(),
+      id: uuid(),
       content,
       source,
       category: category.name,
@@ -162,7 +163,7 @@ const addItem = useCallback(
       note: string,
     ) => {
       const annotation: Annotation = {
-        id: crypto.randomUUID(),
+        id: uuid(),
         start,
         end,
         note,
@@ -229,7 +230,7 @@ const addItem = useCallback(
   const addCategory = useCallback(
     async (name: string) => {
       const category: Category = {
-        id: crypto.randomUUID(),
+        id: uuid(),
         name,
       }
 
