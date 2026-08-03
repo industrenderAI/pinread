@@ -13,15 +13,15 @@ function migrationFlagKey(userId: string) {
  *    避免每次登录都重复搬运。
  * 2. 只有云端这个账号下还没有任何笔记时才搬运本地数据，避免把这台设备的
  *    本地笔记误覆盖到一个已经在别的设备上使用过的账号。
- * 3. 语言分类按名字去重合并，不重复插入默认语言。
+ * 3. 分类按名字去重合并，不重复插入。
  */
 export async function migrateLocalToCloud(userId: string): Promise<void> {
   const flagKey = migrationFlagKey(userId)
   if (localStorage.getItem(flagKey)) return
 
-  const [localItems, localLanguages] = await Promise.all([
+  const [localItems, localCategories] = await Promise.all([
     localRepository.getItems(),
-    localRepository.getLanguages(),
+    localRepository.getCategories(),
   ])
 
   if (localItems.length === 0) {
@@ -38,12 +38,17 @@ export async function migrateLocalToCloud(userId: string): Promise<void> {
     }
   }
 
-  const cloudLanguages = await cloudRepo.getLanguages()
-  const existingNames = new Set(cloudLanguages.map((l) => l.name))
-  for (const lang of localLanguages) {
-    if (!existingNames.has(lang.name)) {
-      await cloudRepo.addLanguage({ id: crypto.randomUUID(), name: lang.name })
-      existingNames.add(lang.name)
+  const cloudCategories = await cloudRepo.getCategories()
+  const existingNames = new Set(cloudCategories.map((c) => c.name))
+
+  for (const category of localCategories) {
+    if (!existingNames.has(category.name)) {
+      await cloudRepo.addCategory({
+        id: crypto.randomUUID(),
+        name: category.name,
+      })
+
+      existingNames.add(category.name)
     }
   }
 

@@ -16,13 +16,13 @@ export interface Item {
   id: string
   content: string
   source: string
-  language: string
+  category: string
   createdAt: number
   updatedAt: number
   annotations: Annotation[]
 }
 
-export interface Language {
+export interface Category {
   id: string
   name: string
 }

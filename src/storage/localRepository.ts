@@ -1,8 +1,8 @@
-import type { Item, Language } from '../types/item'
+import type { Item, Category } from '../types/item'
 import type { Repository } from './repository'
 
 const ITEMS_KEY = 'language-notes:items'
-const LANGUAGES_KEY = 'language-notes:languages'
+const CATEGORIES_KEY = 'pinread:categories'
 
 function readItems(): Item[] {
   const raw = localStorage.getItem(ITEMS_KEY)
@@ -13,13 +13,13 @@ function writeItems(items: Item[]): void {
   localStorage.setItem(ITEMS_KEY, JSON.stringify(items))
 }
 
-function readLanguages(): Language[] | null {
-  const raw = localStorage.getItem(LANGUAGES_KEY)
-  return raw ? (JSON.parse(raw) as Language[]) : null
+function readCategories(): Category[] | null {
+  const raw = localStorage.getItem(CATEGORIES_KEY)
+  return raw ? (JSON.parse(raw) as Category[]) : null
 }
 
-function writeLanguages(languages: Language[]): void {
-  localStorage.setItem(LANGUAGES_KEY, JSON.stringify(languages))
+function writeCategories(categories: Category[]): void {
+  localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories))
 }
 
 export const localRepository: Repository = {
@@ -27,17 +27,8 @@ export const localRepository: Repository = {
     return readItems()
   },
 
-  async getLanguages() {
-    const existing = readLanguages()
-    if (existing) return existing
-    // 首次使用的默认语言
-    const defaults: Language[] = [
-      { id: 'english', name: 'English' },
-      { id: 'japanese', name: '日本語' },
-      { id: 'chinese', name: '中文' },
-    ]
-    writeLanguages(defaults)
-    return defaults
+  async getCategories() {
+    return readCategories() ?? []
   },
 
   async addItem(item) {
@@ -72,7 +63,21 @@ export const localRepository: Repository = {
     )
   },
 
-  async addLanguage(language) {
-    writeLanguages([...(readLanguages() ?? []), language])
+  async addCategory(category) {
+    writeCategories([...(readCategories() ?? []), category])
+  },
+
+  async updateCategory(id, name) {
+    writeCategories(
+      (readCategories() ?? []).map((category) =>
+        category.id === id ? { ...category, name } : category,
+      ),
+    )
+  },
+
+  async deleteCategory(id) {
+    writeCategories(
+      (readCategories() ?? []).filter((category) => category.id !== id),
+    )
   },
 }

@@ -1,18 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { Annotation, Item, Language } from '../types/item'
+import type { Annotation, Item, Category } from '../types/item'
 import { localRepository } from '../storage/localRepository'
 import { createCloudRepository } from '../storage/cloudRepository'
 import { migrateLocalToCloud } from '../storage/migrateLocalToCloud'
 
 /**
- * userId 为 null：未登录，走本地 localStorage（本地体验版）。
- * userId 有值：已登录，走 Supabase 云端数据库，多设备共享同一份数据。
- * 从 null 变成有值的那一刻（刚登录成功），会先把这台设备上的本地笔记
- * 迁移一次到云端，详见 migrateLocalToCloud。
+ * userId 为 null：未登录，走本地 localStorage。
+ * userId 有值：已登录，走 Supabase 云端数据库。
  */
 export function useItems(userId: string | null) {
   const [items, setItems] = useState<Item[]>([])
-  const [languages, setLanguages] = useState<Language[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
 
   const repo = useMemo(
@@ -23,97 +21,180 @@ export function useItems(userId: string | null) {
   useEffect(() => {
     let cancelled = false
     setLoading(true)
+
     ;(async () => {
       if (userId) {
         await migrateLocalToCloud(userId)
       }
-      const [loadedItems, loadedLanguages] = await Promise.all([
+
+      const [loadedItems, loadedCategories] = await Promise.all([
         repo.getItems(),
-        repo.getLanguages(),
+        repo.getCategories(),
       ])
+
       if (cancelled) return
+
       setItems(loadedItems)
-      setLanguages(loadedLanguages)
+      setCategories(loadedCategories)
       setLoading(false)
     })()
+
     return () => {
       cancelled = true
     }
   }, [userId, repo])
 
+
   const addItem = useCallback(
-    async (content: string, source: string, language: string) => {
+    async (content: string, source: string, category: string) => {
       const now = Date.now()
+
       const item: Item = {
         id: crypto.randomUUID(),
         content,
         source,
-        language,
+        category,
         createdAt: now,
         updatedAt: now,
         annotations: [],
       }
+
       await repo.addItem(item)
+
       setItems((prev) => [item, ...prev])
+
       return item
     },
     [repo],
   )
 
+
   const updateItem = useCallback(
-    async (id: string, content: string, source: string, language: string) => {
+    async (
+      id: string,
+      content: string,
+      source: string,
+      category: string,
+    ) => {
       const now = Date.now()
+
       setItems((prev) => {
         const current = prev.find((it) => it.id === id)
+
         if (!current) return prev
-        // 批注是按字符位置(start/end)定位的，原文一旦改动，旧的位置就可能不再
-        // 对应原来选中的那段文字，所以这里只在原文没变时保留批注，原文变了就清空，
-        // 避免出现批注错位、指向错误文字的问题。
+
         const contentChanged = current.content !== content
-        const annotations = contentChanged ? [] : current.annotations
+
+        const annotations = contentChanged
+          ? []
+          : current.annotations
+
         repo
-          .updateItem(id, { content, source, language, annotations, updatedAt: now })
-          .catch((err) => console.error('updateItem failed', err))
+          .updateItem(id, {
+            content,
+            source,
+            category,
+            annotations,
+            updatedAt: now,
+          })
+          .catch((err) =>
+            console.error('updateItem failed', err),
+          )
+
         return prev.map((it) =>
-          it.id === id ? { ...it, content, source, language, annotations, updatedAt: now } : it,
+          it.id === id
+            ? {
+                ...it,
+                content,
+                source,
+                category,
+                annotations,
+                updatedAt: now,
+              }
+            : it,
         )
       })
     },
     [repo],
   )
 
+
   const deleteItem = useCallback(
     async (id: string) => {
       await repo.deleteItem(id)
-      setItems((prev) => prev.filter((it) => it.id !== id))
+
+      setItems((prev) =>
+        prev.filter((it) => it.id !== id),
+      )
     },
     [repo],
   )
+
 
   const addAnnotation = useCallback(
-    async (itemId: string, start: number, end: number, note: string) => {
-      const annotation: Annotation = { id: crypto.randomUUID(), start, end, note }
+    async (
+      itemId: string,
+      start: number,
+      end: number,
+      note: string,
+    ) => {
+      const annotation: Annotation = {
+        id: crypto.randomUUID(),
+        start,
+        end,
+        note,
+      }
+
       const now = Date.now()
-      await repo.addAnnotation(itemId, annotation, now)
+
+      await repo.addAnnotation(
+        itemId,
+        annotation,
+        now,
+      )
+
       setItems((prev) =>
         prev.map((it) =>
           it.id === itemId
-            ? { ...it, annotations: [...it.annotations, annotation], updatedAt: now }
+            ? {
+                ...it,
+                annotations: [
+                  ...it.annotations,
+                  annotation,
+                ],
+                updatedAt: now,
+              }
             : it,
         ),
       )
     },
     [repo],
   )
+
 
   const deleteAnnotation = useCallback(
-    async (itemId: string, annotationId: string) => {
+    async (
+      itemId: string,
+      annotationId: string,
+    ) => {
       const now = Date.now()
-      await repo.deleteAnnotation(itemId, annotationId, now)
+
+      await repo.deleteAnnotation(
+        itemId,
+        annotationId,
+        now,
+      )
+
       setItems((prev) =>
         prev.map((it) =>
           it.id === itemId
-            ? { ...it, annotations: it.annotations.filter((a) => a.id !== annotationId), updatedAt: now }
+            ? {
+                ...it,
+                annotations: it.annotations.filter(
+                  (a) => a.id !== annotationId,
+                ),
+                updatedAt: now,
+              }
             : it,
         ),
       )
@@ -121,25 +202,69 @@ export function useItems(userId: string | null) {
     [repo],
   )
 
-  const addLanguage = useCallback(
+
+  const addCategory = useCallback(
     async (name: string) => {
-      const lang: Language = { id: crypto.randomUUID(), name }
-      await repo.addLanguage(lang)
-      setLanguages((prev) => [...prev, lang])
-      return lang
+      const category: Category = {
+        id: crypto.randomUUID(),
+        name,
+      }
+
+      await repo.addCategory(category)
+
+      setCategories((prev) => [
+        ...prev,
+        category,
+      ])
+
+      return category
     },
     [repo],
   )
+
+
+  const updateCategory = useCallback(
+    async (id: string, name: string) => {
+      await repo.updateCategory(id, name)
+
+      setCategories((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? { ...item, name }
+            : item,
+        ),
+      )
+    },
+    [repo],
+  )
+
+
+  const deleteCategory = useCallback(
+    async (id: string) => {
+      await repo.deleteCategory(id)
+
+      setCategories((prev) =>
+        prev.filter((item) => item.id !== id),
+      )
+    },
+    [repo],
+  )
+
 
   return {
     items,
-    languages,
+    categories,
     loading,
+
     addItem,
     updateItem,
     deleteItem,
+
     addAnnotation,
     deleteAnnotation,
-    addLanguage,
+
+    addCategory,
+    updateCategory,
+    deleteCategory,
   }
 }
