@@ -118,3 +118,20 @@ body {
 .sheet-panel-closing {
   animation: sheet-slide-down .22s cubic-bezier(0.32, 0, 0.67, 0) forwards;
 }
+
+
+/* 整页切换：进入时从右边滑入，返回时往右边滑出，跟系统 App 的左右切换手感一致 */
+@keyframes page-slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes page-slide-out-right {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+.page-slide-in {
+  animation: page-slide-in-right .28s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.page-slide-out {
+  animation: page-slide-out-right .25s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+}

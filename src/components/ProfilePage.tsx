@@ -1,5 +1,10 @@
+import { useState } from 'react'
 import type { User } from '../types/item'
 import { Avatar } from './Avatar'
+
+// 要跟 index.css 里 .page-slide-out 的动画时长对上，
+// 不然会出现"页面已经滑走但还没真正切回首页"或者相反的情况。
+const CLOSE_ANIMATION_MS = 250
 
 const MENU_ITEMS = [
   {
@@ -60,12 +65,26 @@ function ChevronRight() {
     onAccountClick: () => void
   }) {
 
+ const [closing, setClosing] = useState(false)
+
+  // 返回按钮走这里：先播放"往右滑出"的动画，动画播完了
+  // 再真正调用 onBack，让 App.tsx 把 view 切回首页。
+  const handleBack = () => {
+    if (closing) return
+    setClosing(true)
+    setTimeout(onBack, CLOSE_ANIMATION_MS)
+  }
+
   return (
-    <div className="fixed inset-0 z-20 mx-auto flex max-w-lg flex-col bg-paper">
+        <div
+      className={`fixed inset-0 z-20 mx-auto flex max-w-lg flex-col bg-paper ${
+        closing ? 'page-slide-out' : 'page-slide-in'
+      }`}
+    >
       <div className="relative flex items-center px-4 py-4">
         <button
-          onClick={onBack}
-          aria-label="Return"
+          onClick={handleBack}
+          aria-label="Back"
           className="-m-3.5 flex items-center justify-center p-4 text-accent-text"
         >
           <img
@@ -80,7 +99,7 @@ function ChevronRight() {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col overflow-y-auto px-5 pt-4">
+      <div className="flex flex-1 flex-col overflow-y-auto">
         {user ? (
           <div className="flex items-center gap-5">
             <Avatar user={user} size="md" />
@@ -90,7 +109,7 @@ function ChevronRight() {
             </div>
           </div>
         ) : (
-          <div className="flex justify-between items-center gap-3">
+          <div className="flex justify-between items-center gap-3  py-4 px-4"> 
             <Avatar user={null} size="md" />
             <button
               onClick={onLoginClick}
@@ -101,7 +120,7 @@ function ChevronRight() {
           </div>
         )}
 
-        <div className="mt-6 flex flex-col">
+        <div className="mt-6 flex flex-col px-4">
           {MENU_ITEMS.map((item) => (
             <button
               key={item.action}

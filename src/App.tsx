@@ -61,6 +61,9 @@ function App() {
 
 const [view, setView] = useState<View>('list')
 const [selectedId, setSelectedId] = useState<string | null>(null)
+// 记录这次跳去登录页是从哪触发的，登录页返回/登录成功后要回到同一个地方，
+// 而不是不管三七二十一都回个人中心。
+const [loginReturnTo, setLoginReturnTo] = useState<View>('profile')
 
 if (authLoading || itemsLoading) return null
 
@@ -80,25 +83,30 @@ const selected = items.find((it) => it.id === selectedId) ?? null
           setSelectedId(id)
           setView('detail')
         }}
-        // onNew={() => setView('new')}
+
         onNew={() => {
           if (!user) {
+            setLoginReturnTo('list')
             setView('login')
             return
           }
           setView('new')
         }}
+        
         onDelete={(id) => deleteItem(id)}
         onProfileClick={() => setView('profile')}
       />
 
 
-      {view === 'profile' && (
+      {(view === 'profile' || view === 'categories' || view === 'account') && (
         <ProfilePage
           user={user}
           onBack={() => setView('list')}
           onLogout={() => logout()}
-          onLoginClick={() => setView('login')}
+          onLoginClick={() => {
+                      setLoginReturnTo('profile')
+                      setView('login')
+                    }}
                     onCategoryClick={() => setView('categories')}
                     onAccountClick={() => setView('account')}
                   />
@@ -116,8 +124,8 @@ const selected = items.find((it) => it.id === selectedId) ?? null
 
       {view === 'login' && (
         <LoginPage
-          onBack={() => setView('profile')}
-          onSuccess={() => setView('profile')}
+          onBack={() => setView(loginReturnTo)}
+          onSuccess={() => setView(loginReturnTo)}
           onSignUpWithPassword={signUpWithPassword}
           onSignInWithPassword={signInWithPassword}
           onSendOtp={sendOtp}

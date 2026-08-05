@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import type { Category, Item } from '../types/item'
 
+// 要跟 index.css 里 .page-slide-out 的动画时长对上，
+// 不然会出现"页面已经滑走但还没真正切回首页"或者相反的情况。
+const CLOSE_ANIMATION_MS = 250
+
 export function CategoryManagePage({
   categories,
   items,
@@ -19,11 +23,21 @@ export function CategoryManagePage({
   const [newName, setNewName] = useState('')
   const [addError, setAddError] = useState<string | null>(null)
 
+
+  const [closing, setClosing] = useState(false)
+  const CategoryManageBack = () => {
+    if (closing) return
+    setClosing(true)
+    setTimeout(onBack, CLOSE_ANIMATION_MS)
+  }
+
   return (
-    <div className="fixed inset-0 z-30 mx-auto flex max-w-lg flex-col bg-paper">
+    <div className={`fixed inset-0 z-20 mx-auto flex max-w-lg flex-col bg-paper ${
+        closing ? 'page-slide-out' : 'page-slide-in'
+      }`}>
       <div className="relative flex items-center px-4 py-5">
         <button
-          onClick={onBack}
+          onClick={CategoryManageBack}
           aria-label="Return"
           className="-m-3.5 flex items-center justify-center p-4 text-accent-text"
         >
