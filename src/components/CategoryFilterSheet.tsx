@@ -101,7 +101,7 @@ export function CategoryFilterSheet({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-2">
+        <div className="flex-1 overflow-y-auto px-5">
 
           <button
             onClick={() => handlePick('all')}
@@ -119,7 +119,7 @@ export function CategoryFilterSheet({
             <button
               key={c.id}
               onClick={() => handlePick(c.name)}
-              className="flex w-full items-center justify-between border-b border-line/60 py-3.5 text-left text-sm text-ink"
+              className="flex w-full items-center justify-between py-3.5 text-left text-lg font-bold text-ink"
             >
               <span>{c.name}</span>
               {value === c.name && (

@@ -9,6 +9,7 @@ import { ProfilePage } from './components/ProfilePage'
 import { LoginPage } from './components/LoginPage'
 import { CategoryManagePage } from './components/CategoryManagePage'
 import { AccountPage } from './components/AccountPage'
+import { SyncSettingsPage } from './components/SyncSettingsPage'
 
 
 type View =
@@ -20,6 +21,7 @@ type View =
   | 'login'
   | 'categories'
   | 'account'
+  | 'sync'
 
 function App() {
   const {
@@ -41,6 +43,9 @@ function App() {
     items,
     categories,
     loading: itemsLoading,
+    refreshing,
+    lastSyncedAt,
+    refresh,
 
     addItem,
     updateItem,
@@ -95,31 +100,44 @@ const selected = items.find((it) => it.id === selectedId) ?? null
         onProfileClick={() => setView('profile')}
       />
 
-
-      {(view === 'profile' || view === 'categories' || view === 'account') && (
+      {(view === 'profile' || view === 'categories' || view === 'account' || view === 'sync') && (
         <ProfilePage
           user={user}
           onBack={() => setView('list')}
           onLogout={() => logout()}
           onLoginClick={() => {
-                      setLoginReturnTo('profile')
-                      setView('login')
-                    }}
-                    onCategoryClick={() => setView('categories')}
-                    onAccountClick={() => setView('account')}
-                  />
-                )}
-                {view === 'account' && (
-                  <AccountPage
-                    user={user}
-                    onBack={() => setView('profile')}
-                    onUpdateName={updateName}
-                    onUpdateEmail={updateEmail}
-                    onUpdatePassword={updatePassword}
-                    onDeleteAccount={deleteAccount}
-                  />
-                )}
-
+            setLoginReturnTo('profile')
+            setView('login')
+          }}
+          onCategoryClick={() => setView('categories')}
+          onAccountClick={() => setView('account')}
+          onSyncClick={() => setView('sync')}
+        />
+      )}
+      {view === 'account' && (
+        <AccountPage
+          user={user}
+          onBack={() => setView('profile')}
+          onUpdateName={updateName}
+          onUpdateEmail={updateEmail}
+          onUpdatePassword={updatePassword}
+          onDeleteAccount={deleteAccount}
+        />
+      )}
+      {view === 'sync' && (
+        <SyncSettingsPage
+          user={user}
+          lastSyncedAt={lastSyncedAt}
+          refreshing={refreshing}
+          onBack={() => setView('profile')}
+          onRefresh={refresh}
+          onLoginClick={() => {
+            setLoginReturnTo('sync')
+            setView('login')
+          }}
+        />
+      )}
+      
       {view === 'login' && (
         <LoginPage
           onBack={() => setView(loginReturnTo)}

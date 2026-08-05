@@ -242,7 +242,7 @@ export function LoginPage({
               <button
                 onClick={handlePasswordSubmit}
                 disabled={submitting}
-                className="h-11 w-full rounded-full bg-ink text-sm font-medium text-paper disabled:opacity-50"
+                className="h-11 w-full rounded-full bg-ink text-sm font-medium text-paper active:bg-ink/80"
               >
                 {isRegister ? '注册' : '登录'}
               </button>
@@ -266,13 +266,13 @@ export function LoginPage({
                 type="email"
                 autoFocus
                 disabled={otpSent}
-                className="h-11 w-full rounded-lg border border-line bg-paper px-3 text-sm outline-none disabled:opacity-50"
+                className="h-11 w-full rounded-lg border border-line bg-paper px-3 text-sm outline-none"
               />
               {!otpSent ? (
                 <button
                   onClick={handleSendOtp}
                   disabled={submitting}
-                  className="h-11 w-full rounded-full bg-ink text-sm font-medium text-paper disabled:opacity-50"
+                  className="h-11 w-full rounded-full bg-ink text-sm font-medium text-paper active:bg-ink/80"
                 >
                   发送验证码
                 </button>
@@ -290,7 +290,7 @@ export function LoginPage({
                   <button
                     onClick={handleVerifyOtp}
                     disabled={submitting}
-                    className="h-11 w-full rounded-full bg-ink text-sm font-medium text-paper disabled:opacity-50"
+                    className="h-11 w-full rounded-full bg-ink text-sm font-medium text-paper active:bg-ink/80"
                   >
                     验证并登录
                   </button>
@@ -318,7 +318,7 @@ export function LoginPage({
           <button
             onClick={handleGoogle}
             disabled={submitting}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-full border border-line text-sm text-ink disabled:opacity-50"
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-full border border-line text-sm text-ink "
           >
             <GoogleIcon />
             使用 Google 登录

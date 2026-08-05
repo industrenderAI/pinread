@@ -48,7 +48,7 @@ export function CategoryPickerField({
   return (
     <button
       onClick={onOpen}
-      className="flex h-11 w-full items-center justify-between rounded-lg border border-line bg-paper-card px-3 text-sm"
+      className="flex h-11 w-full items-center justify-between  border-b border-line/60 px-3 font-bold text-md"
     >
       <span className={value ? 'text-ink' : 'text-ink-faint'}>
         {value || '选择分类'}
@@ -133,8 +133,8 @@ export function CategoryPickerSheet({
           closing ? 'sheet-panel-closing' : 'sheet-panel'
         }`}
       >
-        <div className="flex items-center justify-between border-b border-line px-5 py-5">
-          <span className="text-base font-medium text-ink">选择分类</span>
+        <div className="flex items-center justify-between px-5 py-5">
+          <span className="text-lg font-bold text-ink">选择分类</span>
           <button onClick={requestClose} aria-label="关闭">
             <img src="/icons/close.svg" alt="" className="h-4 w-4" />
           </button>
@@ -145,14 +145,14 @@ export function CategoryPickerSheet({
             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-accent">
               <CheckIcon />
             </span>
-            已成功添加「{justAdded}」
+            添加成功「{justAdded}」
           </div>
         )}
 
         <div className="flex-1 overflow-y-auto px-5 py-2">
           {categories.length === 0 && !adding && (
             <p className="py-6 text-center text-xs text-ink-faint">
-              还没有分类，先添加一个吧
+              尚无分类
             </p>
           )}
 
@@ -163,7 +163,7 @@ export function CategoryPickerSheet({
                 onSelect(c.name)
                 requestClose()
               }}
-              className="flex w-full items-center justify-between border-b border-line/60 py-3.5 text-left text-sm text-ink last:border-b-0"
+              className="flex w-full items-center justify-between py-4 text-left text-base text-ink"
             >
               <span>{c.name}</span>
               {value === c.name && (
@@ -175,7 +175,7 @@ export function CategoryPickerSheet({
           ))}
         </div>
 
-        <div className="px-5 pt-2">
+        <div className="px-5 py-4 bg-paper">
           {adding ? (
             <div className="flex flex-col gap-2">
               <div className="flex gap-2">
@@ -187,15 +187,26 @@ export function CategoryPickerSheet({
                     if (addError) setAddError(null)
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-                  placeholder="比如：英语学习"
-                  className="h-10 flex-1 rounded-lg border border-line bg-paper-card px-3 text-sm outline-none"
+                  placeholder="例：英语学习"
+                  className="
+                    w-full
+                    h-10
+                    flex-1
+                    border-b
+                  border-line/60
+                  focus:border-accent
+                    focus:outline-hidden
+                    px-3
+                    text-lg
+                    outline-none
+                    text-ink-faint"
                 />
                 <button
                   onClick={handleAdd}
                   disabled={submitting}
-                  className="rounded-lg bg-accent px-4 text-sm text-on-accent disabled:opacity-50"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-2xl leading-none text-on-accent"
                 >
-                  {submitting ? '添加中…' : '添加'}
+                 +
                 </button>
               </div>
               {addError && <p className="text-xs text-danger">{addError}</p>}
@@ -206,7 +217,7 @@ export function CategoryPickerSheet({
                 setAdding(true)
                 setAddError(null)
               }}
-              className="flex h-10 w-full items-center justify-center gap-1 rounded-lg border border-dashed border-line text-sm text-ink-faint"
+              className="h-11 w-full rounded-full bg-ink text-sm font-medium text-paper active:bg-ink/80"
             >
               + 新建分类
             </button>

@@ -53,80 +53,82 @@ export function SyncSettingsPage({
 
   return (
     <div
-      className={`fixed inset-0 z-30 mx-auto flex max-w-lg flex-col bg-paper ${
+      className={`fixed inset-0 z-30  mx-auto flex max-w-lg flex-col bg-paper ${
         closing ? 'page-slide-out' : 'page-slide-in'
       }`}
     >
-      <div className="relative flex items-center px-4 py-5">
-        <button
-          onClick={handleBack}
-          aria-label="返回"
-          className="-m-3.5 flex items-center justify-center p-4 text-accent-text"
-        >
-          <img src="/icons/back.svg" className="h-auto w-3" alt="Return to previous page" />
-        </button>
+      <div className='bg-ink/5 h-full w-full'>
+        <div className="relative flex items-center px-4 py-5 bg-paper">
+          <button
+            onClick={handleBack}
+            aria-label="返回"
+            className="-m-3.5 flex items-center justify-center p-4 text-accent-text"
+          >
+            <img src="/icons/back.svg" className="h-auto w-3" alt="Return to previous page" />
+          </button>
 
-        <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold">
-          云同步
-        </span>
-      </div>
+          <span className="absolute left-1/2 -translate-x-1/2 text-lg font-bold">
+            云同步
+          </span>
+        </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pt-2">
+        <div className="flex-1 overflow-y-auto px-5 pt-6 ">
 
-        {/* 同步状态卡片 */}
-        <div className="rounded-xl border border-line bg-paper-card p-4">
-          <div className="flex items-center gap-2">
-            <span
-              className={`h-2 w-2 shrink-0 rounded-full ${
-                user ? 'bg-accent' : 'bg-ink-faint'
-              }`}
-            />
-            <span className="text-sm font-bold text-ink">
-              {user ? '云同步已开启' : '仅保存在本机，未同步'}
-            </span>
+          {/* 同步状态卡片 */}
+          <div className="rounded-xl border border-line bg-paper-card px-3 py-6">
+            <div className="flex items-center gap-2">
+              <span
+                className={`h-2 w-2 shrink-0 rounded-full ${
+                  user ? 'bg-accent' : 'bg-ink-faint'
+                }`}
+              />
+              <span className="text-lg font-bold text-ink">
+                {user ? '云同步已开启' : '尚未同步'}
+              </span>
+            </div>
+
+            {user ? (
+              <div className="mt-4 text-xs text-ink-faint flex justify-between items-center">
+                <span>{user.email}</span>
+                <span>上次同步：{formatSyncedAt(lastSyncedAt)}</span>
+              </div>
+            ) : (
+              <div className="mt-4 text-xs text-ink-faint">
+                登录后会自动云端同步，登录其他设备同步查看。
+              </div>
+            )}
           </div>
+            {!user && (
+              <button
+                onClick={onLoginClick}
+              className="mt-6 h-11 w-full rounded-full bg-ink text-sm font-medium text-paper  active:bg-ink/80"
+              >
+                点击登录，开启同步
+              </button>
+            )}
 
-          {user ? (
-            <p className="mt-2 text-xs text-ink-faint">
-              账号：{user.email} · 上次同步：{formatSyncedAt(lastSyncedAt)}
-            </p>
-          ) : (
-            <p className="mt-2 text-xs text-ink-faint">
-              笔记目前只存在这台设备的浏览器里，换个设备或清空浏览器数据都会丢失。登录后会自动同步到云端，并且可以在任何设备上查看。
-            </p>
-          )}
-
-          {!user && (
+          {/* 手动重新同步 */}
+          {user && (
             <button
-              onClick={onLoginClick}
-              className="mt-3 h-9 w-full rounded-full bg-ink text-xs font-bold text-paper"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="mt-6 h-11 w-full rounded-full bg-ink text-sm font-medium text-paper  active:bg-ink/80"
             >
-              点击登录，开启同步
+              {refreshing ? '同步中…' : justSynced ? '✓ 已是最新' : '重新同步'}
             </button>
           )}
+
+          {/* 说明文字 */}
+          <div className="mt-auto pt-16">
+            <p className="mb-2 text-xs font-extrabold text-ink-soft">关于同步</p>
+            <ul className="space-y-2 text-xs leading-relaxed text-ink-soft">
+              <li>· 未登录时，数据仅保存在当前设备。</li>
+              <li>· 登录后，所有修改都会自动同步到云端。</li>
+              <li>· 如果你在其他设备修改了数据，可以点击「重新同步」获取最新内容。</li>
+            </ul>
+          </div>
+
         </div>
-
-        {/* 手动重新同步 */}
-        {user && (
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-full border border-line text-sm text-ink disabled:opacity-50"
-          >
-            {refreshing ? '同步中…' : justSynced ? '✓ 已是最新' : '重新同步'}
-          </button>
-        )}
-
-        {/* 说明文字 */}
-        <div className="mt-8">
-          <p className="mb-2 text-xs font-bold text-ink-faint">同步是怎么回事</p>
-          <ul className="space-y-2 text-xs leading-relaxed text-ink-faint">
-            <li>· • 未登录时，数据仅保存在当前设备。</li>
-            <li>· 登录后，所有修改都会自动同步到云端。</li>
-            <li>· 如果你在其他设备修改了数据，可以点击「检查更新」获取最新内容。</li>
-          </ul>
-        </div>
-
       </div>
     </div>
   )

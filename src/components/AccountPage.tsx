@@ -306,29 +306,29 @@ export function AccountPage({
                 setDeleteStep('confirm')
                 setDeleteError(null)
               }}
-              className="w-full text-center text-xs text-ink-faint"
+              className={primaryBtnClass}
             >
               注销账号
             </button>
           ) : (
-            <div className="rounded-lg border border-danger/40 p-4">
-              <p className="text-sm font-medium text-danger">确定要注销账号吗？</p>
-              <p className="mt-1 text-xs text-ink-faint">
-                注销后账号和所有笔记数据都会被永久删除，无法恢复。
+            <div className="rounded-lg border border-line p-4 mb-4 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.10)]">
+              <p className="text-lg font-bold text-ink">确定注销账号吗？</p>
+              <p className="mt-2 text-xs text-ink-faint">
+                注销后账号和所有数据将会被永久删除，无法恢复。
               </p>
-              <div className="mt-3 flex gap-3">
-                <button
-                  onClick={() => setDeleteStep('idle')}
-                  className="h-9 flex-1 rounded-full border border-line text-xs text-ink"
-                >
-                  再想想
-                </button>
+              <div className="mt-6 flex gap-3">
                 <button
                   onClick={handleDeleteAccount}
                   disabled={deleteSubmitting}
                   className="h-9 flex-1 rounded-full bg-danger text-xs text-paper disabled:opacity-50"
                 >
-                  确认注销
+                  是
+                </button>
+                                <button
+                  onClick={() => setDeleteStep('idle')}
+                  className="h-9 flex-1 rounded-full border border-line text-xs text-ink"
+                >
+                  否
                 </button>
               </div>
               {deleteError && <p className="mt-2 text-xs text-danger">{deleteError}</p>}

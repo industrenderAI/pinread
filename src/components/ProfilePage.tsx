@@ -56,6 +56,7 @@ function ChevronRight() {
     onLoginClick,
     onCategoryClick,
     onAccountClick,
+    onSyncClick,
   }: {
     user: User | null
     onBack: () => void
@@ -63,6 +64,7 @@ function ChevronRight() {
     onLoginClick: () => void
     onCategoryClick: () => void
     onAccountClick: () => void
+    onSyncClick: () => void
   }) {
 
  const [closing, setClosing] = useState(false)
@@ -99,9 +101,9 @@ function ChevronRight() {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col overflow-y-auto">
+      <div className="flex flex-1 flex-col overflow-y-auto bg">
         {user ? (
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-5 bg-paper py-8 px-4">
             <Avatar user={user} size="md" />
             <div className="min-w-0">
               <p className="truncate text-lg font-bold text-ink">{user.name}</p>
@@ -120,7 +122,7 @@ function ChevronRight() {
           </div>
         )}
 
-        <div className="mt-6 flex flex-col px-4">
+        <div className="mb-8 mt-2 flex flex-col px-4">
           {MENU_ITEMS.map((item) => (
             <button
               key={item.action}
@@ -135,6 +137,9 @@ function ChevronRight() {
                   }
                   onAccountClick()
                 }
+                  if (item.action === 'sync') {
+                  onSyncClick()
+                }
               }}
               className="flex items-center justify-between py-5 text-left text-lg text-ink font-bold"
             >
@@ -145,12 +150,14 @@ function ChevronRight() {
         </div>
 
         {user && (
-          <button
-            onClick={onLogout}
-            className="mt-auto mb-8 h-12 w-full max-w-xs self-center shrink-0 rounded-full bg-ink text-sm text-paper"
-          >
-            退出登录
-          </button>
+          <div className='mt-auto my-12 px-5'>
+              <button
+                onClick={onLogout}
+                className="h-11 w-full rounded-full bg-ink text-sm font-medium text-paper  active:bg-ink/80"
+              >
+                退出登录
+              </button>
+          </div>
         )}
       </div>
     </div>

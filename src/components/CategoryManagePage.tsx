@@ -70,11 +70,10 @@ export function CategoryManagePage({
              border-line/60
              focus:border-accent
               focus:outline-hidden
-              bg-paper-card
               px-3
-              text-sm
+              text-lg
               outline-none
-              text-ink/50
+              text-ink
             "
           />
 
@@ -85,7 +84,7 @@ export function CategoryManagePage({
               if (!name) return
 
               if (categories.some((c) => c.name === name)) {
-                setAddError('这个分类已经存在了')
+                setAddError('此分类已存在')
                 return
               }
 
