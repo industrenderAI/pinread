@@ -203,7 +203,7 @@ export function AccountPage({
           />
         </button>
         <div className="absolute left-1/2 -translate-x-1/2">
-          <span className="text-lg font-bold">账户管理</span>
+          <span className="text-lg font-bold">账号管理</span>
         </div>
       </div>
 
@@ -211,7 +211,8 @@ export function AccountPage({
         {/* 昵称 */}
         <SettingRow
           label="用户名"
-          value={nameNotice ? undefined : user?.name}
+          // value={nameNotice ? undefined : user?.name}
+            value={user?.name}
           expanded={openRow === 'name'}
           onToggle={() => toggleRow('name')}
         >

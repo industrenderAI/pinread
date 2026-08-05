@@ -90,12 +90,12 @@ export function CategoryFilterSheet({
       <div className="absolute inset-0" onClick={requestClose} />
 
       <div
-        className={`relative z-10 flex min-h-[40vh] max-h-[70vh] w-full flex-col rounded-t-2xl bg-paper pb-6 shadow-[0_-5px_15px_-5px_rgba(0,0,0,0.10)] ${
+        className={`relative z-10 flex min-h-[50vh] max-h-[70vh] w-full flex-col  rounded-t-2xl  bg-paper pb-6 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.10)] ${
           closing ? 'sheet-panel-closing' : 'sheet-panel'
         }`}
       >
-        <div className="flex items-center justify-between  px-5 py-3.5">
-          <span className="text-lg font-bold text-ink">分类选择</span>
+        <div className="flex items-center justify-between  px-5 py-5">
+          <span className="text-lg font-bold text-ink">分类</span>
           <button onClick={requestClose} aria-label="关闭">
             <img src="/icons/close.svg" alt="" className="h-4 w-4" />
           </button>

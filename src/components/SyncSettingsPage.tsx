@@ -67,7 +67,7 @@ export function SyncSettingsPage({
         </button>
 
         <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold">
-          同步设定
+          云同步
         </span>
       </div>
 
@@ -82,7 +82,7 @@ export function SyncSettingsPage({
               }`}
             />
             <span className="text-sm font-bold text-ink">
-              {user ? '已登录，正在同步到云端' : '仅保存在本机，未同步'}
+              {user ? '云同步已开启' : '仅保存在本机，未同步'}
             </span>
           </div>
 
@@ -121,10 +121,9 @@ export function SyncSettingsPage({
         <div className="mt-8">
           <p className="mb-2 text-xs font-bold text-ink-faint">同步是怎么回事</p>
           <ul className="space-y-2 text-xs leading-relaxed text-ink-faint">
-            <li>· 没登录时，笔记只存在这台设备本地，不会上传到任何地方。</li>
-            <li>· 登录后，每次新增、编辑、删除笔记或分类，都会实时直接写入云端，不需要手动点"同步"。</li>
-            <li>· 首次登录时，会自动把之前在本机存的笔记搬到云端一次，之后就不会重复搬了。</li>
-            <li>· "重新同步"按钮用于：怀疑当前页面数据不是最新（比如在另一台设备改过），手动重新拉取一次云端的最新内容。</li>
+            <li>· • 未登录时，数据仅保存在当前设备。</li>
+            <li>· 登录后，所有修改都会自动同步到云端。</li>
+            <li>· 如果你在其他设备修改了数据，可以点击「检查更新」获取最新内容。</li>
           </ul>
         </div>
 

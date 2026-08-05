@@ -8,11 +8,11 @@ const CLOSE_ANIMATION_MS = 250
 
 const MENU_ITEMS = [
   {
-    label:'账户管理',
+    label:'账号管理',
     action:'account',
   },
   {
-    label:'同步设定',
+    label:'云同步',
     action:'sync',
   },
   {
@@ -147,7 +147,7 @@ function ChevronRight() {
         {user && (
           <button
             onClick={onLogout}
-            className="mt-auto mb-8 h-12 w-full shrink-0 rounded-full bg-ink text-sm text-paper"
+            className="mt-auto mb-8 h-12 w-full max-w-xs self-center shrink-0 rounded-full bg-ink text-sm text-paper"
           >
             退出登录
           </button>
