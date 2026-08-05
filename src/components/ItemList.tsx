@@ -59,7 +59,7 @@ export function ItemList({
 
 
   return (
-    <div className="mx-auto min-h-screen max-w-lg bg-paper">
+    <div className="mx-auto h-screen max-w-lg touch-pan-y overscroll-none overflow-y-auto   bg-gray-200">
 
       <div className="sticky top-0 z-10 bg-paper/70 backdrop-blur-md border-b border-line/50 px-3 py-3">
 
@@ -86,7 +86,7 @@ export function ItemList({
                 }
               }}
               aria-label="搜索"
-              className="flex h-9 w-9 shrink-0 items-center justify-center"
+              className="flex h-9 w-9 shrink-0 items-center justify-center "
             >
 
               <img
@@ -96,7 +96,7 @@ export function ItemList({
                     : '/icons/search.svg'
                 }
                 alt=""
-                className="h-5 w-5"
+                className="h-4 w-4"
               />
 
             </button>
@@ -115,7 +115,7 @@ export function ItemList({
 
 
 
-        <div className="my-2 flex items-center gap-2">
+        <div className="my-2 flex items-center px-2 pt-2">
 
           {searchOpen && (
             <input
@@ -126,12 +126,15 @@ export function ItemList({
               className="
                 h-9
                 flex-1
-                border-b
-                border-line/60
-                focus:border-accent
+                px-4
                 focus:outline-hidden
-                px-3
-                text-xs
+                focus:ring-1
+                focus:ring-ink
+                focus:ring-offset-1
+                focus:ring-offset-paper
+                bg-paper
+                rounded-full
+                text-sm
                 text-ink
                 outline-none
                 placeholder:text-ink-faint
