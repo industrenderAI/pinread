@@ -11,8 +11,6 @@ import { CategoryManagePage } from './components/CategoryManagePage'
 import { AccountPage } from './components/AccountPage'
 
 
-
-
 type View =
   | 'list'
   | 'new'

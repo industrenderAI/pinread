@@ -48,13 +48,13 @@ export function CategoryManagePage({
           />
         </button>
 
-        <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold">
+        <span className="absolute left-1/2 -translate-x-1/2 text-lg font-bold">
           分类管理
         </span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 pt-5">
-        <div className="flex text-xs text-ink-faint">
+        <div className="flex text-xs text-ink-faint gap-6">
           <input
             value={newName}
             onChange={(e) => {
@@ -66,13 +66,15 @@ export function CategoryManagePage({
             className="
               h-10
               flex-1
-              rounded-lg
               border-b
-              border-line
+             border-line/60
+             focus:border-accent
+              focus:outline-hidden
               bg-paper-card
               px-3
               text-sm
               outline-none
+              text-ink/50
             "
           />
 
@@ -101,9 +103,9 @@ export function CategoryManagePage({
             +
           </button>
         </div>
-
+        {/* 分类名判断与提示 */}
         {addError && (
-          <p className="mt-1.5 text-xs text-danger">
+          <p className="mt-3 text-xs font-medium text-danger">
             {addError}
           </p>
         )}
@@ -141,17 +143,24 @@ function CategoryRow({
   const [deleting, setDeleting] = useState(false)
 
   return (
-    <div className="py-5">
+    <div className="py-5 px-4">
       <div className="flex items-center justify-between">
         {edit ? (
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="
-              h-8
+              h-10
+              flex-1
               border-b
-              px-2
-              text-xl
+             border-line/60
+             focus:border-accent
+              focus:outline-hidden
+              bg-paper-card
+              font-bold
+              text-lg
+              outline-none
+              text-accent-text
             "
           />
         ) : (
@@ -161,7 +170,7 @@ function CategoryRow({
         )}
 
         {/* 右边编辑 / 删除 */}
-        <div className="flex gap-6 text-sm text-ink-faint">
+        <div className="flex gap-6 text-xs text-ink-faint">
           <button
             onClick={async () => {
               if (edit) {

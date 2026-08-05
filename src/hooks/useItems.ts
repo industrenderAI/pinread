@@ -13,7 +13,11 @@ export function useItems(userId: string | null) {
   const [items, setItems] = useState<Item[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
-
+  const [refreshing, setRefreshing] = useState(false)
+  // 只在内存里记一下"最近一次成功从云端/本地拉到数据是什么时候"，
+  // 用于同步设定页面展示，刷新页面就会丢，不用持久化。
+  const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null)
+  
   const repo = useMemo(
     () => (userId ? createCloudRepository(userId) : localRepository),
     [userId],
@@ -38,12 +42,31 @@ export function useItems(userId: string | null) {
       setItems(loadedItems)
       setCategories(loadedCategories)
       setLoading(false)
+      setLastSyncedAt(Date.now())
     })()
 
     return () => {
       cancelled = true
     }
   }, [userId, repo])
+
+ 
+  /** 手动"重新同步"：不走迁移逻辑，只是重新拉一次当前来源（云端或本地）的最新数据。 */
+  const refresh = useCallback(async () => {
+    setRefreshing(true)
+    try {
+      const [loadedItems, loadedCategories] = await Promise.all([
+        repo.getItems(),
+        repo.getCategories(),
+      ])
+ 
+      setItems(loadedItems)
+      setCategories(loadedCategories)
+      setLastSyncedAt(Date.now())
+    } finally {
+      setRefreshing(false)
+    }
+  }, [repo])
 
 const addItem = useCallback(
   async (
@@ -311,6 +334,9 @@ const addItem = useCallback(
     items,
     categories,
     loading,
+    refreshing,
+    lastSyncedAt,
+    refresh,
 
     addItem,
     updateItem,

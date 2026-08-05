@@ -28,7 +28,7 @@ const MENU_ITEMS = [
     action:'help',
   },
   {
-    label:'关于我们',
+    label:'关于Pinread',
     action:'about',
   },
 ]
@@ -136,7 +136,7 @@ function ChevronRight() {
                   onAccountClick()
                 }
               }}
-              className="flex items-center justify-between py-4 text-left text-lg text-ink font-bold"
+              className="flex items-center justify-between py-5 text-left text-lg text-ink font-bold"
             >
               <span>{item.label}</span>
               <ChevronRight />
