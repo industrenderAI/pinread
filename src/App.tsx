@@ -10,6 +10,9 @@ import { LoginPage } from './components/LoginPage'
 import { CategoryManagePage } from './components/CategoryManagePage'
 import { AccountPage } from './components/AccountPage'
 
+
+
+
 type View =
   | 'list'
   | 'new'
@@ -186,7 +189,10 @@ const selected = items.find((it) => it.id === selectedId) ?? null
               onDelete={deleteCategory}
             />
           )}
+
+
     </>
+    
   )
 }
 

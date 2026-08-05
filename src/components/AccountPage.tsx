@@ -190,7 +190,7 @@ export function AccountPage({
 
   return (
     <div className="fixed inset-0 z-30 mx-auto flex max-w-lg flex-col bg-paper">
-      <div className="relative flex items-center px-4 py-5">
+      <div className="relative flex items-center px-4 py-4">
         <button
           onClick={onBack}
           aria-label="Return"

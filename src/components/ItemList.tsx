@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { Item, Category, User } from '../types/item'
 import { ItemCard } from './ItemCard'
 import { Avatar } from './Avatar'
+import { CategoryFilterField, CategoryFilterSheet } from './CategoryFilterSheet'
 
 export function ItemList({
   items,
@@ -23,6 +24,19 @@ export function ItemList({
   const [query, setQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [searchOpen, setSearchOpen] = useState(false)
+  const [filterOpen, setFilterOpen] = useState(false)
+
+  const usedCategories = categories.filter((c) =>
+    items.some((it) => it.category === c.name),
+  )
+  const hasUnfiled = items.some((it) => it.category === '')
+
+  const filterLabel =
+    categoryFilter === 'all'
+      ? '全部笔记'
+      : categoryFilter === ''
+        ? '未分类'
+        : (usedCategories.find((c) => c.name === categoryFilter)?.name ?? '全部')
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -60,7 +74,7 @@ export function ItemList({
           </div>
 
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
 
             <button
               onClick={() => {
@@ -113,6 +127,7 @@ export function ItemList({
                 h-9
                 flex-1
                 border-b
+                border-line/60
                 focus:border-accent
                 focus:outline-hidden
                 px-3
@@ -128,59 +143,10 @@ export function ItemList({
 
           {!searchOpen && (
 
-            <div className="flex-1 flex gap-2 overflow-x-auto">
-
-              <button
-                onClick={() => setCategoryFilter('all')}
-                className={`shrink-0 rounded-full px-4 py-1 text-xs ${
-                  categoryFilter === 'all'
-                    ? 'bg-accent text-on-accent'
-                    : 'border border-line bg-paper-card text-ink-soft'
-                }`}
-              >
-                全部
-              </button>
-
-
-
-              {categories
-                .filter((c) =>
-                  items.some(
-                    (it) => it.category === c.name
-                  )
-                )
-                .map((c) => (
-
-                  <button
-                    key={c.id}
-                    onClick={() =>
-                      setCategoryFilter(c.name)
-                    }
-                    className={`shrink-0 rounded-full px-3 py-1 text-xs ${
-                      categoryFilter === c.name
-                        ? 'bg-accent text-on-accent'
-                        : 'border border-line bg-paper-card text-ink-soft'
-                    }`}
-                  >
-                    {c.name}
-                  </button>
-
-                ))}
-
-              {items.some((it) => it.category === '') && (
-                <button
-                  onClick={() => setCategoryFilter('')}
-                  className={`shrink-0 rounded-full px-3 py-1 text-xs ${
-                    categoryFilter === ''
-                      ? 'bg-accent text-on-accent'
-                      : 'border border-line bg-paper-card text-ink-soft'
-                  }`}
-                >
-                  未分类
-                </button>
-              )}
-
-            </div>
+            <CategoryFilterField
+              label={filterLabel}
+              onOpen={() => setFilterOpen(true)}
+            />
 
           )}
 
@@ -188,16 +154,24 @@ export function ItemList({
 
       </div>
 
+      {filterOpen && (
+        <CategoryFilterSheet
+          categories={usedCategories}
+          hasUnfiled={hasUnfiled}
+          value={categoryFilter}
+          onSelect={setCategoryFilter}
+          onClose={() => setFilterOpen(false)}
+        />
+      )}
+
 
 
       <div className="space-y-2.5 px-3 pb-24 pt-3">
 
         {filtered.length === 0 ? (
 
-          <div className="px-8 py-20 text-center text-sm leading-loose text-ink-faint">
+          <div className="px-8 py-20 text-center text-base leading-loose text-ink-faint">
             暂无笔记
-            <br />
-            点击添加按钮，粘贴内容开始
           </div>
 
         ) : (
@@ -222,7 +196,7 @@ export function ItemList({
       <button
         onClick={onNew}
         aria-label="新建笔记"
-        className="fixed bottom-7 left-1/2 flex h-13.5 w-13.5 -translate-x-1/2 items-center justify-center rounded-full bg-accent text-2xl text-on-accent shadow-lg"
+        className="fixed bottom-7 left-1/2 flex h-18 w-18 -translate-x-1/2 items-center justify-center rounded-full bg-accent text-2xl text-on-accent shadow-lg"
       >
         +
       </button>

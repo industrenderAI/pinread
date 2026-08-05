@@ -100,3 +100,21 @@ body {
     filter: invert(1);
   }
 }
+
+
+
+/* 底部弹出面板：从下往上滑入 / 关闭时从上往下滑出，iOS 风格的缓动曲线 */
+@keyframes sheet-slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes sheet-slide-down {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+.sheet-panel {
+  animation: sheet-slide-up .32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.sheet-panel-closing {
+  animation: sheet-slide-down .22s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+}

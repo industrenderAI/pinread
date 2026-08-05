@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import type { Category } from '../types/item'
 
+// 要跟 index.css 里 .sheet-panel-closing 的动画时长对上，
+// 不然会出现"弹窗已经消失但组件还没卸载"或者相反的情况。
+const CLOSE_ANIMATION_MS = 220
+
 function CheckIcon() {
   return (
     <svg
@@ -54,7 +58,7 @@ export function CategoryPickerField({
   )
 }
 
-/** 真正的弹出面板：背景遮罩 + 底部滑出的分类列表 + 新建分类入口 */
+/** 真正的弹出面板：底部滑出的分类列表 + 新建分类入口 */
 export function CategoryPickerSheet({
   categories,
   value,
@@ -68,11 +72,20 @@ export function CategoryPickerSheet({
   onAddCategory: (name: string) => Promise<Category>
   onClose: () => void
 }) {
+  const [closing, setClosing] = useState(false)
   const [adding, setAdding] = useState(false)
   const [newName, setNewName] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
   const [justAdded, setJustAdded] = useState<string | null>(null)
+
+  // 所有"关闭"的入口都走这里：先播放向下滑出的动画，
+  // 动画播完了再真正调用 onClose 让父组件卸载这个弹窗。
+  const requestClose = () => {
+    if (closing) return
+    setClosing(true)
+    setTimeout(onClose, CLOSE_ANIMATION_MS)
+  }
 
   const handleAdd = async () => {
     const name = newName.trim()
@@ -100,7 +113,7 @@ export function CategoryPickerSheet({
 
       // 让用户看一眼"已添加成功"，再自动关闭弹窗
       setTimeout(() => {
-        onClose()
+        requestClose()
       }, 700)
     } catch (err) {
       setAddError(
@@ -113,14 +126,17 @@ export function CategoryPickerSheet({
 
   return (
     <div className="fixed inset-0 z-40 mx-auto flex max-w-lg items-end">
-      {/* 背景遮罩，点击关闭 */}
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="absolute inset-0" onClick={requestClose} />
 
-      <div className="relative z-10 flex max-h-[70vh] w-full flex-col rounded-t-2xl bg-paper pb-6">
+      <div
+        className={`relative z-10 flex min-h-[40vh] max-h-[70vh] w-full flex-col rounded-t-2xl bg-paper pb-6 shadow-[0_-10px_30px_-5px_rgba(0,0,0,0.15)] ${
+          closing ? 'sheet-panel-closing' : 'sheet-panel'
+        }`}
+      >
         <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
           <span className="text-base font-medium text-ink">选择分类</span>
-          <button onClick={onClose} className="text-xs text-ink-faint">
-            关闭
+          <button onClick={requestClose} aria-label="关闭">
+            <img src="/icons/close.svg" alt="" className="h-4 w-4" />
           </button>
         </div>
 
@@ -145,7 +161,7 @@ export function CategoryPickerSheet({
               key={c.id}
               onClick={() => {
                 onSelect(c.name)
-                onClose()
+                requestClose()
               }}
               className="flex w-full items-center justify-between border-b border-line/60 py-3.5 text-left text-sm text-ink last:border-b-0"
             >

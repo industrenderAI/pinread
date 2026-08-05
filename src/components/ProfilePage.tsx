@@ -62,7 +62,7 @@ function ChevronRight() {
 
   return (
     <div className="fixed inset-0 z-20 mx-auto flex max-w-lg flex-col bg-paper">
-      <div className="relative flex items-center px-4 py-5">
+      <div className="relative flex items-center px-4 py-4">
         <button
           onClick={onBack}
           aria-label="Return"
@@ -117,7 +117,7 @@ function ChevronRight() {
                   onAccountClick()
                 }
               }}
-              className="flex items-center justify-between py-5 text-left text-lg text-ink font-bold"
+              className="flex items-center justify-between py-4 text-left text-lg text-ink font-bold"
             >
               <span>{item.label}</span>
               <ChevronRight />
