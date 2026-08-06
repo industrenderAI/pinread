@@ -10,7 +10,8 @@ import { LoginPage } from './components/LoginPage'
 import { CategoryManagePage } from './components/CategoryManagePage'
 import { AccountPage } from './components/AccountPage'
 import { SyncSettingsPage } from './components/SyncSettingsPage'
-
+import { AboutPage } from './components/AboutPage'
+import { HelpPage } from './components/HelpPage'
 
 type View =
   | 'list'
@@ -22,6 +23,8 @@ type View =
   | 'categories'
   | 'account'
   | 'sync'
+  | 'about'
+  | 'help'
 
 function App() {
   const {
@@ -78,29 +81,31 @@ const selected = items.find((it) => it.id === selectedId) ?? null
 
   return (
     <>
-      <ItemList
-        items={items}
-        categories={usedCategories}
-        user={user}
-        onOpen={(id) => {
-          setSelectedId(id)
-          setView('detail')
-        }}
+      {view === 'list' && (
+        <ItemList
+          items={items}
+          categories={usedCategories}
+          user={user}
+          onOpen={(id) => {
+            setSelectedId(id)
+            setView('detail')
+          }}
 
-        onNew={() => {
-          if (!user) {
-            setLoginReturnTo('list')
-            setView('login')
-            return
-          }
-          setView('new')
-        }}
-        
-        onDelete={(id) => deleteItem(id)}
-        onProfileClick={() => setView('profile')}
-      />
+          onNew={() => {
+            if (!user) {
+              setLoginReturnTo('list')
+              setView('login')
+              return
+            }
+            setView('new')
+          }}
 
-      {(view === 'profile' || view === 'categories' || view === 'account' || view === 'sync') && (
+          onDelete={(id) => deleteItem(id)}
+          onProfileClick={() => setView('profile')}
+        />
+      )}
+
+      {view === 'profile' && (
         <ProfilePage
           user={user}
           onBack={() => setView('list')}
@@ -112,6 +117,8 @@ const selected = items.find((it) => it.id === selectedId) ?? null
           onCategoryClick={() => setView('categories')}
           onAccountClick={() => setView('account')}
           onSyncClick={() => setView('sync')}
+          onAboutClick={() => setView('about')}
+          onHelpClick={() => setView('help')}
         />
       )}
       {view === 'account' && (
@@ -138,6 +145,18 @@ const selected = items.find((it) => it.id === selectedId) ?? null
         />
       )}
       
+      {view === 'about' && (
+        <AboutPage
+          onBack={() => setView('profile')}
+        />
+      )}
+
+      {view === 'help' && (
+        <HelpPage
+          onBack={() => setView('profile')}
+        />
+      )}
+
       {view === 'login' && (
         <LoginPage
           onBack={() => setView(loginReturnTo)}

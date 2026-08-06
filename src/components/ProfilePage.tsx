@@ -65,6 +65,8 @@ function ChevronRight() {
     onCategoryClick,
     onAccountClick,
     onSyncClick,
+    onAboutClick,
+    onHelpClick,
   }: {
     user: User | null
     onBack: () => void
@@ -73,6 +75,8 @@ function ChevronRight() {
     onCategoryClick: () => void
     onAccountClick: () => void
     onSyncClick: () => void
+    onAboutClick: () => void
+    onHelpClick: () => void
   }) {
 
  const [closing, setClosing] = useState(false)
@@ -143,6 +147,12 @@ function ChevronRight() {
                 }
                   if (item.action === 'sync') {
                   onSyncClick()
+                }
+                  if (item.action === 'about') {
+                  onAboutClick()
+                }
+               if (item.action === 'help') {
+                  onHelpClick()
                 }
               }}
               className="flex items-center justify-between py-5 text-left text-lg text-ink font-bold"

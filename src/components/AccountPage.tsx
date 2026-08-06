@@ -3,6 +3,8 @@ import type { User } from '../types/item'
 
 type AuthResult = { error: string | null }
 
+const CLOSE_ANIMATION_MS = 250
+
 // 跟 LoginPage 保持一致的密码规则
 const ALLOWED_SPECIAL_CHARS = '._'
 const PASSWORD_ALLOWED_REGEX = /^[A-Za-z0-9._]+$/
@@ -61,7 +63,7 @@ function SettingRow({
     <div className="py-5">
       <button onClick={onToggle} className="flex w-full items-center justify-between text-left">
         <div className="min-w-0">
-          <p className="text-lg font-bold  text-ink">{label}</p>
+          <p className="text-lg font-bold text-ink">{label}</p>
           {value && <p className="mt-0.5 truncate text-sm text-ink-faint">{value}</p>}
         </div>
         <div className={`shrink-0 transition-transform ${expanded ? 'rotate-90' : ''}`}>
@@ -92,6 +94,7 @@ export function AccountPage({
   onUpdatePassword: (password: string) => Promise<AuthResult>
   onDeleteAccount: () => Promise<AuthResult>
 }) {
+  const [closing, setClosing] = useState(false)
   const [openRow, setOpenRow] = useState<'name' | 'email' | 'password' | null>(null)
 
   const [name, setName] = useState(user?.name ?? '')
@@ -113,6 +116,16 @@ export function AccountPage({
   const [deleteStep, setDeleteStep] = useState<'idle' | 'confirm'>('idle')
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [deleteSubmitting, setDeleteSubmitting] = useState(false)
+
+  const handleBack = () => {
+    if (closing) return
+
+    setClosing(true)
+
+    setTimeout(() => {
+      onBack()
+    }, CLOSE_ANIMATION_MS)
+  }
 
   const toggleRow = (row: 'name' | 'email' | 'password') => {
     setOpenRow((prev) => (prev === row ? null : row))
@@ -197,14 +210,30 @@ export function AccountPage({
   }
 
   return (
-    <div className="fixed inset-0 z-30 mx-auto flex max-w-lg flex-col bg-paper">
+    <div
+      className={`
+      fixed
+      inset-0
+      z-30
+      mx-auto
+      flex
+      max-w-lg
+      flex-col
+      bg-paper
+      ${
+        closing
+          ? 'page-slide-out'
+          : 'page-slide-in'
+      }
+      `}
+    >
       <div className="relative flex items-center px-4 py-4">
         <button
-          onClick={onBack}
+          onClick={handleBack}
           aria-label="Return"
           className="-m-3.5 flex items-center justify-center p-4"
         >
-            <BackIcon className="w-4 h-4" />
+          <BackIcon className="w-4 h-4" />
         </button>
         <div className="absolute left-1/2 -translate-x-1/2">
           <span className="text-lg font-bold">账号管理</span>
@@ -215,8 +244,7 @@ export function AccountPage({
         {/* 昵称 */}
         <SettingRow
           label="用户名"
-          // value={nameNotice ? undefined : user?.name}
-            value={user?.name}
+          value={user?.name}
           expanded={openRow === 'name'}
           onToggle={() => toggleRow('name')}
         >
@@ -234,7 +262,7 @@ export function AccountPage({
             {nameError && <p className="text-xs text-danger">{nameError}</p>}
           </div>
         </SettingRow>
-        {nameNotice && !openRow && <p className="pt-2 text-xs text-accent-text">{nameNotice}</p>}
+        {nameNotice && !openRow && <p className="text-xs text-accent-text">{nameNotice}</p>}
 
         {/* 邮箱 */}
         <SettingRow
@@ -328,7 +356,7 @@ export function AccountPage({
                 >
                   是
                 </button>
-                                <button
+                <button
                   onClick={() => setDeleteStep('idle')}
                   className="h-9 flex-1 rounded-full border border-line text-xs text-ink"
                 >

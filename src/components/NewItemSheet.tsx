@@ -114,7 +114,7 @@ export function NewItemSheet({
 
                 {isEdit && (
                   <p className="mt-2.5 text-xs leading-relaxed text-ink-faint">
-                    提醒：如果修改了这里的原文内容，之前在这篇笔记里加的批注会被清空（批注是按原文位置定位的，原文变了位置就对不上了）。只改来源或分类不影响批注。
+                    若修改原文内容，之前添加的笔记标记将会被清空。
                   </p>
                 )}
 
