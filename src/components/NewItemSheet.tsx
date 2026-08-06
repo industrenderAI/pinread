@@ -13,7 +13,7 @@ export function NewItemSheet({
   initial?: { content: string; source: string; category: string }
   onCancel: () => void
   onSave: (content: string, source: string, category: string) => void
-  onAddCategory: (name: string) => Promise<Category>
+  onAddCategory: (name: string, color: string) => Promise<Category>
 }) {
   const isEdit = !!initial
 

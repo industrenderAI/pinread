@@ -8,7 +8,7 @@ import { CategoryDot } from './CategoryDot'
 const CLOSE_ANIMATION_MS = 250
 
 /** 一排预设色圆点，点哪个就选中哪个 */
-function ColorSwatchRow({
+export function ColorSwatchRow({
   value,
   onChange,
 }: {

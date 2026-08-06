@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { Category } from '../types/item'
 import { CategoryDot } from './CategoryDot'
+import { ColorSwatchRow } from './CategoryManagePage'
+import { pickNextCategoryColor } from '../lib/categoryColors'
 
 // 要跟 index.css 里 .sheet-panel-closing 的动画时长对上，
 // 不然会出现"弹窗已经消失但组件还没卸载"或者相反的情况。
@@ -75,12 +77,13 @@ export function CategoryPickerSheet({
   categories: Category[]
   value: string
   onSelect: (name: string) => void
-  onAddCategory: (name: string) => Promise<Category>
+  onAddCategory: (name: string, color: string) => Promise<Category>
   onClose: () => void
 }) {
   const [closing, setClosing] = useState(false)
   const [adding, setAdding] = useState(false)
   const [newName, setNewName] = useState('')
+  const [newColor, setNewColor] = useState(() => pickNextCategoryColor(categories.length))
   const [submitting, setSubmitting] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
   const [justAdded, setJustAdded] = useState<string | null>(null)
@@ -121,9 +124,10 @@ export function CategoryPickerSheet({
     setSubmitting(true)
 
     try {
-      const cat = await onAddCategory(name)
+      const cat = await onAddCategory(name, newColor)
 
       setNewName('')
+      setNewColor(pickNextCategoryColor(categories.length + 1))
       onSelect(cat.name)
       setJustAdded(cat.name)
 
@@ -197,8 +201,8 @@ export function CategoryPickerSheet({
 
         <div className="px-5 pt-2">
           {adding ? (
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
+            <div className="flex flex-col gap-3">
+              <div className="flex text-xs text-ink-faint gap-6">
                 <input
                   autoFocus
                   value={newName}
@@ -207,18 +211,37 @@ export function CategoryPickerSheet({
                     if (addError) setAddError(null)
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-                  placeholder="比如：英语学习"
-                  className="h-10 flex-1 rounded-lg border border-line bg-paper-card px-3 text-sm outline-none"
+                  placeholder="输入新分类"
+                  className="
+                    h-10
+                    flex-1
+                    border-b
+                   border-line/60
+                   focus:border-accent
+                    focus:outline-hidden
+                    bg-paper-card
+                    px-3
+                    text-sm
+                    outline-none
+                    text-ink/50
+                  "
                 />
+
                 <button
                   onClick={handleAdd}
                   disabled={submitting}
-                  className="rounded-lg bg-accent px-4 text-sm text-on-accent disabled:opacity-50"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-2xl leading-none text-on-accent disabled:opacity-50"
                 >
-                  {submitting ? '添加中…' : '添加'}
+                  +
                 </button>
               </div>
-              {addError && <p className="text-xs text-danger">{addError}</p>}
+
+              {/* 新分类的颜色 */}
+              <ColorSwatchRow value={newColor} onChange={setNewColor} />
+
+              {addError && (
+                <p className="text-xs font-medium text-danger">{addError}</p>
+              )}
             </div>
           ) : (
             <button
