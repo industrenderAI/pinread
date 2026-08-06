@@ -228,7 +228,7 @@ export function CategoryPickerSheet({
               }}
               className="flex h-10 w-full items-center justify-center gap-1 border rounded-full border-line bg-ink text-sm text-paper"
             >
-              添加分类
+              新建分类
             </button>
           )}
         </div>
