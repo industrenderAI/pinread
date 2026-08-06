@@ -148,12 +148,8 @@ export function ItemDetail({
   return (
     <div className="fixed inset-0 z-20 mx-auto flex max-w-lg flex-col bg-paper">
       <div className="flex items-center justify-between border-b border-line px-4 py-3.5">
-        <button onClick={onBack} className="text-[15px] text-accent-text">
-              <div  className='flex justify-between gap-2.5'>
-               <img 
-               src="/icons/back.svg" alt="Return to home" 
-               className="h-4 w-auto" />
-               </div>
+        <button onClick={onBack}>
+          <img src="/icons/back.svg" alt="Return to home" className="w-4 h-4" />
         </button>
         <button
           onClick={() => setToolbarOpen((v) => !v)}

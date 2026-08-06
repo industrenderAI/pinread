@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Category } from '../types/item'
+import { CategoryDot } from './CategoryDot'
 
 // 要跟 index.css 里 .sheet-panel-closing 的动画时长对上，
 // 不然会出现"弹窗已经消失但组件还没卸载"或者相反的情况。
@@ -40,18 +41,23 @@ function ChevronDown() {
 /** 表单里那一行"分类：xxx ›"，点了才弹出真正的选择面板 */
 export function CategoryPickerField({
   value,
+  color,
   onOpen,
 }: {
   value: string
+  color?: string
   onOpen: () => void
 }) {
   return (
     <button
       onClick={onOpen}
-      className="flex h-11 w-full items-center justify-between  border-b border-line/60 px-3 font-bold text-md"
+      className="flex h-11 w-full items-center justify-between rounded-lg border border-line bg-paper-card px-3 text-sm"
     >
-      <span className={value ? 'text-ink' : 'text-ink-faint'}>
-        {value || '选择分类'}
+      <span className="flex items-center gap-2">
+        {value && <CategoryDot color={color} />}
+        <span className={value ? 'text-ink' : 'text-ink-faint'}>
+          {value || '选择分类'}
+        </span>
       </span>
       <ChevronDown />
     </button>
@@ -79,6 +85,16 @@ export function CategoryPickerSheet({
   const [addError, setAddError] = useState<string | null>(null)
   const [justAdded, setJustAdded] = useState<string | null>(null)
 
+  // 弹窗开着的时候，锁住背后页面的滚动，不然手指在弹窗区域滑动时，
+  // 手机浏览器会去处理背景页面的越界回弹，导致整个页面卡一下才恢复响应。
+  useEffect(() => {
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [])
+
   // 所有"关闭"的入口都走这里：先播放向下滑出的动画，
   // 动画播完了再真正调用 onClose 让父组件卸载这个弹窗。
   const requestClose = () => {
@@ -97,7 +113,7 @@ export function CategoryPickerSheet({
 
     // 本地先查一遍是否重名，比等后端报错更快、提示也更友好
     if (categories.some((c) => c.name === name)) {
-      setAddError('这个分类已经存在了')
+      setAddError('此分类已经存在')
       return
     }
 
@@ -126,7 +142,8 @@ export function CategoryPickerSheet({
 
   return (
     <div className="fixed inset-0 z-40 mx-auto flex max-w-lg items-end">
-      <div className="absolute inset-0" onClick={requestClose} />
+      {/* 只负责"点空白关闭"，不参与任何滚动/缩放手势判断 */}
+      <div className="absolute inset-0 touch-none" onClick={requestClose} />
 
       <div
         className={`relative z-10 flex min-h-[50vh] max-h-[70vh] w-full flex-col rounded-t-2xl bg-paper pb-6 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.15)] ${
@@ -134,9 +151,9 @@ export function CategoryPickerSheet({
         }`}
       >
         <div className="flex items-center justify-between px-5 py-5">
-          <span className="text-lg font-bold text-ink">选择分类</span>
-          <button onClick={requestClose} aria-label="关闭">
-            <img src="/icons/close.svg" alt="" className="h-4 w-4" />
+          <span className="text-lg font-extrabold text-ink">选择分类</span>
+          <button onClick={requestClose} aria-label="关闭" className='p-3'>
+            <img src="/icons/close.svg" alt="Close icon" className="h-4 w-4" />
           </button>
         </div>
 
@@ -149,7 +166,7 @@ export function CategoryPickerSheet({
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto px-5 py-2">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-2">
           {categories.length === 0 && !adding && (
             <p className="py-6 text-center text-xs text-ink-faint">
               尚无分类
@@ -163,9 +180,12 @@ export function CategoryPickerSheet({
                 onSelect(c.name)
                 requestClose()
               }}
-              className="flex w-full items-center justify-between py-4 text-left text-base text-ink"
+              className="flex w-full items-center justify-between  py-3.5 text-left text-md font-bold text-ink"
             >
-              <span>{c.name}</span>
+              <span className="flex items-center gap-2">
+                <CategoryDot color={c.color} />
+                {c.name}
+              </span>
               {value === c.name && (
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent">
                   <CheckIcon />
@@ -175,7 +195,7 @@ export function CategoryPickerSheet({
           ))}
         </div>
 
-        <div className="px-5 py-4 bg-paper">
+        <div className="px-5 pt-2">
           {adding ? (
             <div className="flex flex-col gap-2">
               <div className="flex gap-2">
@@ -187,26 +207,15 @@ export function CategoryPickerSheet({
                     if (addError) setAddError(null)
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-                  placeholder="例：英语学习"
-                  className="
-                    w-full
-                    h-10
-                    flex-1
-                    border-b
-                  border-line/60
-                  focus:border-accent
-                    focus:outline-hidden
-                    px-3
-                    text-lg
-                    outline-none
-                    text-ink-faint"
+                  placeholder="比如：英语学习"
+                  className="h-10 flex-1 rounded-lg border border-line bg-paper-card px-3 text-sm outline-none"
                 />
                 <button
                   onClick={handleAdd}
                   disabled={submitting}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-2xl leading-none text-on-accent"
+                  className="rounded-lg bg-accent px-4 text-sm text-on-accent disabled:opacity-50"
                 >
-                 +
+                  {submitting ? '添加中…' : '添加'}
                 </button>
               </div>
               {addError && <p className="text-xs text-danger">{addError}</p>}
@@ -217,7 +226,7 @@ export function CategoryPickerSheet({
                 setAdding(true)
                 setAddError(null)
               }}
-              className="h-11 w-full rounded-full bg-ink text-sm font-medium text-paper active:bg-ink/80"
+              className="flex h-10 w-full items-center justify-center gap-1 rounded-lg border border-dashed border-line text-sm text-ink-faint"
             >
               + 新建分类
             </button>

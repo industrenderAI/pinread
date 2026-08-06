@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Category } from '../types/item'
+import { CategoryDot } from './CategoryDot'
 
 // 要跟 index.css 里 .sheet-panel-closing 的动画时长对上，
 // 不然会出现"弹窗已经消失但组件还没卸载"或者相反的情况。
@@ -25,7 +26,7 @@ function ChevronDown() {
   return (
     <svg
       viewBox="0 0 24 24"
-      className="h-4 w-4 text-ink-faint"
+      className="h-4 w-4 text-ink ml-4"
       fill="none"
       stroke="currentColor"
       strokeWidth={2}
@@ -40,16 +41,19 @@ function ChevronDown() {
 /** 首页那颗"全部笔记 ▾"触发按钮，点了才弹出下面的筛选面板 */
 export function CategoryFilterField({
   label,
+  color,
   onOpen,
 }: {
   label: string
+  color?: string
   onOpen: () => void
 }) {
   return (
     <button
       onClick={onOpen}
-      className="inline-flex items-center mt-1 gap-1 rounded-full border border-line bg-paper-card px-4 py-1.5 text-xs font-bold text-ink"
+      className="inline-flex items-center mt-1 gap-1.5 px-1.5 py-1 text-sm font-bold text-ink"
     >
+      {color && <CategoryDot color={color} />}
       <span>{label}</span>
       <ChevronDown />
     </button>
@@ -72,6 +76,16 @@ export function CategoryFilterSheet({
 }) {
   const [closing, setClosing] = useState(false)
 
+  // 弹窗开着的时候，锁住背后页面的滚动，不然手指在弹窗区域滑动时，
+  // 手机浏览器会去处理背景页面的越界回弹，导致整个页面卡一下才恢复响应。
+  useEffect(() => {
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [])
+
   // 所有"关闭"的入口都走这里：先播放向下滑出的动画，
   // 动画播完了再真正调用 onClose 让父组件卸载这个弹窗。
   const requestClose = () => {
@@ -87,25 +101,26 @@ export function CategoryFilterSheet({
 
   return (
     <div className="fixed inset-0 z-40 mx-auto flex max-w-lg items-end">
-      <div className="absolute inset-0" onClick={requestClose} />
+      {/* 只负责"点空白关闭"，不参与任何滚动/缩放手势判断 */}
+      <div className="absolute inset-0 touch-none" onClick={requestClose} />
 
       <div
-        className={`relative z-10 flex min-h-[50vh] max-h-[70vh] w-full flex-col  rounded-t-2xl  bg-paper pb-6 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.10)] ${
+        className={`relative z-10 flex min-h-[50vh] max-h-[70vh] w-full flex-col rounded-t-2xl bg-paper pb-6 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.10)] ${
           closing ? 'sheet-panel-closing' : 'sheet-panel'
         }`}
       >
-        <div className="flex items-center justify-between  px-5 py-5">
+        <div className="flex items-center justify-between px-5 py-5">
           <span className="text-lg font-bold text-ink">分类</span>
           <button onClick={requestClose} aria-label="关闭">
             <img src="/icons/close.svg" alt="" className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-2">
 
           <button
             onClick={() => handlePick('all')}
-            className="flex w-full items-center justify-between  py-3.5 left text-lg font-bold text-ink"
+            className="flex w-full items-center justify-between py-3.5 text-left text-md font-bold text-ink"
           >
             <span>全部</span>
             {value === 'all' && (
@@ -119,9 +134,12 @@ export function CategoryFilterSheet({
             <button
               key={c.id}
               onClick={() => handlePick(c.name)}
-              className="flex w-full items-center justify-between py-3.5 text-left text-lg font-bold text-ink"
+              className="flex w-full items-center justify-between  py-3.5 text-left text-md font-bold text-ink"
             >
-              <span>{c.name}</span>
+              <span className="flex items-center gap-2">
+                <CategoryDot color={c.color} />
+                {c.name}
+              </span>
               {value === c.name && (
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent">
                   <CheckIcon />
@@ -133,7 +151,7 @@ export function CategoryFilterSheet({
           {hasUnfiled && (
             <button
               onClick={() => handlePick('')}
-              className="flex w-full items-center justify-between py-3.5 text-left text-sm text-ink"
+              className="flex w-full items-center justify-between py-3.5 text-left text-md font-bold text-ink"
             >
               <span>未分类</span>
               {value === '' && (

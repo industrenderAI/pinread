@@ -67,7 +67,7 @@ function SettingRow({
 
 const inputClass = 'h-11 w-full rounded-lg border border-line bg-paper px-3 text-sm outline-none'
 const primaryBtnClass =
-  'h-11 w-full rounded-full bg-ink text-sm font-medium text-paper disabled:opacity-50'
+  'h-11 w-full rounded-full bg-ink text-sm font-medium text-paper'
 
 export function AccountPage({
   user,

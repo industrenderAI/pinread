@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import type { Item } from '../types/item'
+import { CategoryDot } from './CategoryDot'
 
 const DELETE_WIDTH = 76
 const OPEN_THRESHOLD = 40
@@ -13,10 +14,12 @@ function formatDate(ts: number) {
 
 export function ItemCard({
   item,
+  categoryColor,
   onClick,
   onDelete,
 }: {
   item: Item
+  categoryColor?: string
   onClick: () => void
   onDelete: () => void
 }) {
@@ -60,17 +63,21 @@ export function ItemCard({
   }
 
   return (
-    <div className="relative overflow-hidden rounded-xl">
+    <div className="relative overflow-hidden">
       <button
         onClick={() => {
           setDragX(0)
           onDelete()
         }}
         aria-label="删除笔记"
-        className="absolute inset-y-0 right-0 flex items-center justify-center bg-danger text-sm text-white"
+        className="absolute inset-y-0 right-0 flex items-center justify-center"
         style={{ width: DELETE_WIDTH }}
       >
-        删除
+        <img
+            src="/icons/delete.svg"
+            alt="delete"
+            className="h-12 w-auto"
+        />
       </button>
       <div
         onPointerDown={onPointerDown}
@@ -83,23 +90,30 @@ export function ItemCard({
           transition: dragging.current ? 'none' : 'transform .2s ease',
           touchAction: 'pan-y',
         }}
-        className="relative cursor-pointer rounded-xl border border-line bg-paper-card p-4 active:bg-accent-soft"
+        className="relative cursor-pointer rounded-md  bg-paper-card p-4 active:bg-accent-soft"
       >
-        <div className="mb-1 flex items-baseline justify-between gap-2">
-          <span className="text-xs font-medium text-ink">{formatDate(item.updatedAt)}</span>
-          <div className="flex items-center gap-1.5 ">
-            <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[11px] text-accent-text font-medium">
-              {item.category}
-            </span>
+        {/* category and label */}
+          <div className="mb-2.5 flex items-center justify-between px-0 py-1">
+            <div className="flex items-center gap-1.5 text-xs text-ink font-extrabold ">
+                <span> {item.category && <CategoryDot color={categoryColor} className="h-2 w-2" />}</span>
+                <span> {item.category || '未分类'} </span> 
+            </div>
             {item.annotations.length > 0 && (
-              <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[11px] text-accent-text font-medium">
-                {item.annotations.length} 条备注
+              <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[9px] text-accent-text font-medium">
+                {item.annotations.length} 条笔记
               </span>
             )}
           </div>
+ 
+        {/* preview textarea */}
+        <div className="mb-2 line-clamp-2 text-xs/6 leading-relaxed text-ink">
+        <p>{preview}</p>
         </div>
-        <p className="line-clamp-2 text-[14.5px] leading-relaxed text-ink">{preview}</p>
-        {item.source && <p className="mt-2 text-xs text-ink-faint font-medium">{item.source}</p>}
+        {/* source | time  */}
+        <div className="flex items-center justify-between mt-2 text-ink-faint font-medium">
+        {item.source && <span className="text-xs">{item.source}</span>}
+        <span className="text-[10px]">{formatDate(item.updatedAt)}</span>
+        </div>
       </div>
     </div>
   )

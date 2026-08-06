@@ -99,13 +99,14 @@ export const localRepository: Repository = {
     return category
   },
 
-  async updateCategory(id, name) {
+  async updateCategory(id, name, color) {
     writeCategories(
       (readCategories() ?? []).map((category) =>
         category.id === id
           ? {
               ...category,
               name,
+              color,
             }
           : category,
       ),

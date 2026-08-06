@@ -1,9 +1,37 @@
 import { useState } from 'react'
 import type { Category, Item } from '../types/item'
+import { CATEGORY_COLOR_PRESETS, pickNextCategoryColor } from '../lib/categoryColors'
+import { CategoryDot } from './CategoryDot'
 
 // 要跟 index.css 里 .page-slide-out 的动画时长对上，
 // 不然会出现"页面已经滑走但还没真正切回首页"或者相反的情况。
 const CLOSE_ANIMATION_MS = 250
+
+/** 一排预设色圆点，点哪个就选中哪个 */
+function ColorSwatchRow({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (key: string) => void
+}) {
+  return (
+    <div className="flex flex-wrap gap-2.5">
+      {CATEGORY_COLOR_PRESETS.map((preset) => (
+        <button
+          key={preset.key}
+          type="button"
+          aria-label={preset.label}
+          onClick={() => onChange(preset.key)}
+          className={`flex h-7 w-7 items-center justify-center rounded-full ${
+            value === preset.key ? 'ring-2 ring-ink ring-offset-2 ring-offset-paper' : ''
+          }`}
+          style={{ backgroundColor: preset.hex }}
+        />
+      ))}
+    </div>
+  )
+}
 
 export function CategoryManagePage({
   categories,
@@ -16,11 +44,12 @@ export function CategoryManagePage({
   categories: Category[]
   items: Item[]
   onBack: () => void
-  onAdd: (name: string) => Promise<Category>
-  onUpdate: (id: string, name: string) => Promise<void>
+  onAdd: (name: string, color: string) => Promise<Category>
+  onUpdate: (id: string, name: string, color: string) => Promise<void>
   onDelete: (id: string) => Promise<void>
 }) {
   const [newName, setNewName] = useState('')
+  const [newColor, setNewColor] = useState(() => pickNextCategoryColor(categories.length))
   const [addError, setAddError] = useState<string | null>(null)
 
 
@@ -70,10 +99,11 @@ export function CategoryManagePage({
              border-line/60
              focus:border-accent
               focus:outline-hidden
+              bg-paper-card
               px-3
-              text-lg
+              text-sm
               outline-none
-              text-ink
+              text-ink/50
             "
           />
 
@@ -84,13 +114,14 @@ export function CategoryManagePage({
               if (!name) return
 
               if (categories.some((c) => c.name === name)) {
-                setAddError('此分类已存在')
+                setAddError('这个分类已经存在了')
                 return
               }
 
               try {
-                await onAdd(name)
+                await onAdd(name, newColor)
                 setNewName('')
+                setNewColor(pickNextCategoryColor(categories.length + 1))
               } catch (err) {
                 setAddError(
                   err instanceof Error ? err.message : '添加失败，请重试'
@@ -102,6 +133,12 @@ export function CategoryManagePage({
             +
           </button>
         </div>
+
+        {/* 新分类的颜色 */}
+        <div className="mt-3">
+          <ColorSwatchRow value={newColor} onChange={setNewColor} />
+        </div>
+
         {/* 分类名判断与提示 */}
         {addError && (
           <p className="mt-3 text-xs font-medium text-danger">
@@ -133,11 +170,12 @@ function CategoryRow({
 }: {
   category: Category
   itemCount: number
-  onUpdate: (id: string, name: string) => Promise<void>
+  onUpdate: (id: string, name: string, color: string) => Promise<void>
   onDelete: (id: string) => Promise<void>
 }) {
   const [edit, setEdit] = useState(false)
   const [name, setName] = useState(category.name)
+  const [color, setColor] = useState(category.color ?? CATEGORY_COLOR_PRESETS[0].key)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -159,11 +197,12 @@ function CategoryRow({
               font-bold
               text-lg
               outline-none
-              text-accent-text
+              text-ink
             "
           />
         ) : (
-          <span className="text-base font-bold text-ink">
+          <span className="flex items-center gap-2 text-base font-bold text-ink">
+            <CategoryDot color={category.color} className="h-2.5 w-2.5" />
             {category.name}
           </span>
         )}
@@ -173,7 +212,7 @@ function CategoryRow({
           <button
             onClick={async () => {
               if (edit) {
-                await onUpdate(category.id, name)
+                await onUpdate(category.id, name, color)
               }
 
               setEdit(!edit)
@@ -198,11 +237,17 @@ function CategoryRow({
         </div>
       </div>
 
+      {edit && (
+        <div className="mt-3">
+          <ColorSwatchRow value={color} onChange={setColor} />
+        </div>
+      )}
+
       {confirmDelete && (
-        <div className="mt-2 rounded-lg border border-danger/40 p-3">
-          <p className="text-xs text-ink">
-            「{category.name}」下有 {itemCount}
-            篇笔记，删除分类后这些笔记会自动移到"未分类"，笔记本身不会被删除。
+        <div className="mt-2 rounded-lg bg-paper-card shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.10)] p-3">
+          <p className="text-xs/5 text-ink">
+            「{category.name}」包含 {itemCount}
+            篇笔记，删除此分类后，笔记将会自动移到"未分类"。
           </p>
 
           <div className="mt-2 flex gap-2">
@@ -221,7 +266,7 @@ function CategoryRow({
                 setDeleting(false)
                 setConfirmDelete(false)
               }}
-              className="h-8 flex-1 rounded-full bg-danger text-xs text-paper disabled:opacity-50"
+              className="h-8 flex-1 rounded-full bg-ink text-xs text-paper disabled:opacity-50"
             >
               确认删除
             </button>

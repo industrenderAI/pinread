@@ -31,12 +31,19 @@ export function ItemList({
   )
   const hasUnfiled = items.some((it) => it.category === '')
 
+  const categoryColorByName = new Map(categories.map((c) => [c.name, c.color]))
+
   const filterLabel =
     categoryFilter === 'all'
-      ? '全部笔记'
+      ? '全部分类'
       : categoryFilter === ''
         ? '未分类'
         : (usedCategories.find((c) => c.name === categoryFilter)?.name ?? '全部')
+
+  const filterColor =
+    categoryFilter === 'all' || categoryFilter === ''
+      ? undefined
+      : categoryColorByName.get(categoryFilter)
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -148,6 +155,7 @@ export function ItemList({
 
             <CategoryFilterField
               label={filterLabel}
+              color={filterColor}
               onOpen={() => setFilterOpen(true)}
             />
 
@@ -184,6 +192,7 @@ export function ItemList({
             <ItemCard
               key={it.id}
               item={it}
+              categoryColor={categoryColorByName.get(it.category)}
               onClick={() => onOpen(it.id)}
               onDelete={() => onDelete(it.id)}
             />

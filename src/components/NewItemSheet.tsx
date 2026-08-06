@@ -48,10 +48,10 @@ export function NewItemSheet({
           onClick={onCancel}
           className="text-base font-semibold text-ink"
         >
-          取消
+          <img src="/icons/close.svg" alt="Close icon" className="h-4 w-4" />
         </button>
 
-        <span className="text-xl font-bold">
+        <span className="text-lg font-bold">
           {isEdit ? '编辑笔记' : '新笔记'}
         </span>
 
@@ -59,7 +59,7 @@ export function NewItemSheet({
           onClick={handleSave}
           className="text-base font-semibold text-ink"
         >
-          完成
+          保存
         </button>
       </div>
 

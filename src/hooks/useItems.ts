@@ -4,6 +4,7 @@ import { localRepository } from '../storage/localRepository'
 import { createCloudRepository } from '../storage/cloudRepository'
 import { migrateLocalToCloud } from '../storage/migrateLocalToCloud'
 import { uuid } from '../lib/uuid'
+import { pickNextCategoryColor } from '../lib/categoryColors'
 
 /**
  * userId 为 null：未登录，走本地 localStorage。
@@ -17,7 +18,7 @@ export function useItems(userId: string | null) {
   // 只在内存里记一下"最近一次成功从云端/本地拉到数据是什么时候"，
   // 用于同步设定页面展示，刷新页面就会丢，不用持久化。
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null)
-  
+
   const repo = useMemo(
     () => (userId ? createCloudRepository(userId) : localRepository),
     [userId],
@@ -50,7 +51,7 @@ export function useItems(userId: string | null) {
     }
   }, [userId, repo])
 
- 
+
   /** 手动"重新同步"：不走迁移逻辑，只是重新拉一次当前来源（云端或本地）的最新数据。 */
   const refresh = useCallback(async () => {
     setRefreshing(true)
@@ -59,7 +60,7 @@ export function useItems(userId: string | null) {
         repo.getItems(),
         repo.getCategories(),
       ])
- 
+
       setItems(loadedItems)
       setCategories(loadedCategories)
       setLastSyncedAt(Date.now())
@@ -68,52 +69,53 @@ export function useItems(userId: string | null) {
     }
   }, [repo])
 
-const addItem = useCallback(
-  async (
-    content: string,
-    source: string,
-    categoryName: string,
-  ) => {
-    const now = Date.now()
+  const addItem = useCallback(
+    async (
+      content: string,
+      source: string,
+      categoryName: string,
+    ) => {
+      const now = Date.now()
 
-    let category = categories.find(
-      (c) => c.name === categoryName,
-    )
+      let category = categories.find(
+        (c) => c.name === categoryName,
+      )
 
-    // 创建笔记时输入了新分类
-    if (!category) {
-      category = await repo.addCategory({
+      // 创建笔记时输入了新分类
+      if (!category) {
+        category = await repo.addCategory({
+          id: uuid(),
+          name: categoryName,
+          color: pickNextCategoryColor(categories.length),
+        })
+
+        setCategories((prev) => [
+          ...prev,
+          category!,
+        ])
+      }
+
+      const item: Item = {
         id: uuid(),
-        name: categoryName,
-      })
+        content,
+        source,
+        category: category.name,
+        createdAt: now,
+        updatedAt: now,
+        annotations: [],
+      }
 
-      setCategories((prev) => [
+      await repo.addItem(item)
+
+      setItems((prev) => [
+        item,
         ...prev,
-        category!,
       ])
-    }
 
-    const item: Item = {
-      id: uuid(),
-      content,
-      source,
-      category: category.name,
-      createdAt: now,
-      updatedAt: now,
-      annotations: [],
-    }
-
-    await repo.addItem(item)
-
-    setItems((prev) => [
-      item,
-      ...prev,
-    ])
-
-    return item
-  },
-  [repo, categories],
-)
+      return item
+    },
+    [repo, categories],
+  )
 
 
   const updateItem = useCallback(
@@ -251,10 +253,11 @@ const addItem = useCallback(
 
 
   const addCategory = useCallback(
-    async (name: string) => {
+    async (name: string, color?: string) => {
       const category: Category = {
         id: uuid(),
         name,
+        color: color ?? pickNextCategoryColor(categories.length),
       }
 
       await repo.addCategory(category)
@@ -266,15 +269,16 @@ const addItem = useCallback(
 
       return category
     },
-    [repo],
+    [repo, categories],
   )
 
 
   const updateCategory = useCallback(
-    async (id: string, name: string) => {
+    async (id: string, name: string, color?: string) => {
       const target = categories.find((c) => c.id === id)
+      const nextColor = color ?? target?.color
 
-      await repo.updateCategory(id, name)
+      await repo.updateCategory(id, name, nextColor)
 
       // 分类改名后，同步把用这个旧名字的笔记也改成新名字，
       // 不然这些笔记会跟改完名的分类"失联"。
@@ -293,7 +297,7 @@ const addItem = useCallback(
       setCategories((prev) =>
         prev.map((item) =>
           item.id === id
-            ? { ...item, name }
+            ? { ...item, name, color: nextColor }
             : item,
         ),
       )

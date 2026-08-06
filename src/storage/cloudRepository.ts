@@ -15,6 +15,7 @@ interface ItemRow {
 interface CategoryRow {
   id: string
   name: string
+  color: string | null
 }
 
 function rowToItem(row: ItemRow): Item {
@@ -51,7 +52,7 @@ export function createCloudRepository(userId: string): Repository {
     async getCategories() {
       const { data, error } = await supabase
         .from('categories')
-        .select('id, name')
+        .select('id, name, color')
         .eq('user_id', userId)
         .order('created_at', { ascending: true })
 
@@ -60,20 +61,21 @@ export function createCloudRepository(userId: string): Repository {
       return ((data ?? []) as CategoryRow[]).map((row) => ({
         id: row.id,
         name: row.name,
+        color: row.color ?? undefined,
       }))
     },
 
-  async addItem(item) {
-    const { error } = await supabase.from('items').insert({
-      id: item.id,
-      user_id: userId,
-      content: item.content,
-      source: item.source,
-      category: item.category,
-      annotations: item.annotations,
-      created_at: item.createdAt,
-      updated_at: item.updatedAt,
-    })
+    async addItem(item) {
+      const { error } = await supabase.from('items').insert({
+        id: item.id,
+        user_id: userId,
+        content: item.content,
+        source: item.source,
+        category: item.category,
+        annotations: item.annotations,
+        created_at: item.createdAt,
+        updated_at: item.updatedAt,
+      })
 
       if (error) throw error
     },
@@ -163,6 +165,7 @@ export function createCloudRepository(userId: string): Repository {
           id: category.id,
           user_id: userId,
           name: category.name,
+          color: category.color ?? null,
         })
 
       if (error) throw error
@@ -170,10 +173,10 @@ export function createCloudRepository(userId: string): Repository {
       return category
     },
 
-    async updateCategory(id, name) {
+    async updateCategory(id, name, color) {
       const { error } = await supabase
         .from('categories')
-        .update({ name })
+        .update({ name, color: color ?? null })
         .eq('id', id)
         .eq('user_id', userId)
 
