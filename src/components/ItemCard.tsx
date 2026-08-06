@@ -95,7 +95,7 @@ export function ItemCard({
         {/* category and label */}
           <div className="mb-2.5 flex items-center justify-between px-0 py-1">
             <div className="flex items-center gap-1.5 text-xs text-ink font-extrabold ">
-<span> <CategoryDot color={item.category ? categoryColor : undefined} className="h-2 w-2" /></span>                <span> {item.category || '未分类'} </span> 
+              <span> <CategoryDot color={item.category ? categoryColor : undefined} className="h-2 w-2" /></span>                <span> {item.category || '未分类'} </span> 
             </div>
             {item.annotations.length > 0 && (
               <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[9px] text-accent-text font-medium">

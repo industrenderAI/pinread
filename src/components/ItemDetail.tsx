@@ -3,6 +3,14 @@ import { useEffect, useRef, useState } from 'react'
 import type { Item } from '../types/item'
 import { NoteModal } from './NoteModal'
 
+function BackIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 19.93 27.53" className={className} fill="currentColor">
+      <path d="M18.93,27.53c-.21,0-.42-.06-.59-.2L0,13.77,18.34.2c.44-.33,1.07-.24,1.4.21.33.44.24,1.07-.21,1.4L3.36,13.77l16.17,11.96c.44.33.54.95.21,1.4-.2.27-.5.41-.8.41Z" />
+    </svg>
+  )
+}
+
 function getTextOffset(container: Node, node: Node, offset: number): number {
   let total = 0
   let found = -1
@@ -147,9 +155,9 @@ export function ItemDetail({
 
   return (
     <div className="fixed inset-0 z-20 mx-auto flex max-w-lg flex-col bg-paper">
-      <div className="flex items-center justify-between border-b border-line px-4 py-3.5">
+      <div className="flex items-center justify-between px-4 py-3.5">
         <button onClick={onBack}>
-          <img src="/icons/back.svg" alt="Return to home" className="w-4 h-4" />
+          <BackIcon className="w-4 h-4" />
         </button>
         <button
           onClick={() => setToolbarOpen((v) => !v)}
@@ -163,15 +171,7 @@ export function ItemDetail({
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 pb-10 pt-5">
-        {/* {item.source && <p className="mb-3.5 text-[13px] text-ink-faint">来自：{item.source}</p>} */}
         <div className={annotationsVisible ? '' : 'ann-hidden'}>
-          {/* <div
-            ref={contentRef}
-            onMouseUp={handleSelection}
-            onTouchEnd={() => setTimeout(handleSelection, 50)}
-            style={{ fontSize: FONT_SIZES[fontStep] }}
-            className="font-serif-cn whitespace-pre-wrap leading-loose"
-          > */}
           <div
             ref={contentRef}
             onMouseUp={handleSelection}
@@ -182,9 +182,9 @@ export function ItemDetail({
             {nodes}
           </div>
         </div>
-        <p className="mt-4 border-t border-line pt-3.5 text-[12.5px] leading-relaxed text-ink-faint">
-          选中文字后可添加批注，点击划线可展开/隐藏笔记。
-        </p>
+        <div className="mt-6 border-t border-line pt-3.5 text-[12.5px] leading-relaxed text-ink-faint">
+          {item.source && <p className="mb-3.5 text-[13px] text-ink-faint">来自：{item.source}</p>}
+        </div>
       </div>
 
       {toolbarOpen && (

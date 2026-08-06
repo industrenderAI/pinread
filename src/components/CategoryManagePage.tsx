@@ -3,6 +3,13 @@ import type { Category, Item } from '../types/item'
 import { CATEGORY_COLOR_PRESETS, pickNextCategoryColor } from '../lib/categoryColors'
 import { CategoryDot } from './CategoryDot'
 
+function BackIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 19.93 27.53" className={className} fill="currentColor">
+      <path d="M18.93,27.53c-.21,0-.42-.06-.59-.2L0,13.77,18.34.2c.44-.33,1.07-.24,1.4.21.33.44.24,1.07-.21,1.4L3.36,13.77l16.17,11.96c.44.33.54.95.21,1.4-.2.27-.5.41-.8.41Z" />
+    </svg>
+  )
+}
 // 要跟 index.css 里 .page-slide-out 的动画时长对上，
 // 不然会出现"页面已经滑走但还没真正切回首页"或者相反的情况。
 const CLOSE_ANIMATION_MS = 250
@@ -24,7 +31,7 @@ export function ColorSwatchRow({
           aria-label={preset.label}
           onClick={() => onChange(preset.key)}
           className={`flex h-7 w-7 items-center justify-center rounded-full ${
-            value === preset.key ? 'ring-2 ring-ink ring-offset-2 ring-offset-paper' : ''
+            value === preset.key ? 'ring-1 ring-ink ring-offset-2 ring-offset-paper' : ''
           }`}
           style={{ backgroundColor: preset.hex }}
         />
@@ -68,13 +75,9 @@ export function CategoryManagePage({
         <button
           onClick={CategoryManageBack}
           aria-label="Return"
-          className="-m-3.5 flex items-center justify-center p-4 text-accent-text"
+          className="-m-3.5 flex items-center justify-center p-4"
         >
-          <img
-            src="/icons/back.svg"
-            className="h-auto w-3"
-            alt="Return to previous page"
-          />
+          <BackIcon className="w-4 h-4" />
         </button>
 
         <span className="absolute left-1/2 -translate-x-1/2 text-lg font-bold">

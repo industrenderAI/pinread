@@ -41,7 +41,13 @@ function GoogleIcon() {
     </svg>
   )
 }
-
+  function BackIcon({ className }: { className?: string }) {
+    return (
+      <svg viewBox="0 0 19.93 27.53" className={className} fill="currentColor">
+        <path d="M18.93,27.53c-.21,0-.42-.06-.59-.2L0,13.77,18.34.2c.44-.33,1.07-.24,1.4.21.33.44.24,1.07-.21,1.4L3.36,13.77l16.17,11.96c.44.33.54.95.21,1.4-.2.27-.5.41-.8.41Z" />
+      </svg>
+    )
+  }
 /**
  * 独立的登录/注册页面（原来是在 ProfilePage 里内联展开的一个表单，
  * 现在拆成单独一屏，点击"点击登录"整页跳转过来，登录成功后 App
@@ -166,7 +172,7 @@ export function LoginPage({
     <div className="fixed inset-0 z-30 mx-auto flex max-w-lg flex-col bg-paper">
       <div className="relative flex items-center border-b border-line px-4 py-3.5">
         <button onClick={onBack} className="text-[15px] text-accent-text">
-          <img src="/icons/back.svg" alt="PinRead_Return" className="h-4 w-auto" />
+            <BackIcon className="w-4 h-4" />        
         </button>
         <div className="absolute left-1/2 -translate-x-1/2">
           <span className="text-base font-medium">{isRegister ? '注册' : '登录'}</span>

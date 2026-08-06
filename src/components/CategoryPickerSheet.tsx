@@ -8,6 +8,14 @@ import { pickNextCategoryColor } from '../lib/categoryColors'
 // 不然会出现"弹窗已经消失但组件还没卸载"或者相反的情况。
 const CLOSE_ANIMATION_MS = 220
 
+function CloseIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 23.01 25.63" className={className} fill="currentColor">
+      <path d="M22.75,23.09l-9.92-10.34L21.54,1.52c.33-.43.23-1.03-.24-1.34-.47-.31-1.11-.21-1.45.22l-8.43,10.88L1.81,1.27c-.38-.4-1.04-.43-1.47-.08-.43.35-.47.96-.09,1.36l9.92,10.34L1.47,24.11c-.33.43-.23,1.03.24,1.34.18.12.4.18.6.18.32,0,.64-.14.84-.4l8.43-10.88,9.61,10.01c.2.21.49.32.78.32.25,0,.49-.08.69-.24.43-.35.47-.96.09-1.36Z"/>
+    </svg>
+  )
+}
+
 function CheckIcon() {
   return (
     <svg
@@ -157,7 +165,7 @@ export function CategoryPickerSheet({
         <div className="flex items-center justify-between px-5 py-5">
           <span className="text-lg font-extrabold text-ink">选择分类</span>
           <button onClick={requestClose} aria-label="关闭" className='p-3'>
-            <img src="/icons/close.svg" alt="Close icon" className="h-4 w-4" />
+             <CloseIcon className="h-4 w-4" />
           </button>
         </div>
 
