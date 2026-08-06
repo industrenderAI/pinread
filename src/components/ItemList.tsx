@@ -84,9 +84,9 @@ export function ItemList({
 
 
   return (
-    <div className="mx-auto h-screen max-w-lg touch-pan-y overscroll-none overflow-y-auto   bg-gray-200">
+    <div className="mx-auto h-screen max-w-lg touch-pan-y overscroll-none overflow-y-auto">
 
-      <div className="sticky top-0 z-10 bg-paper/70 backdrop-blur-md border-b border-line/50 px-3 py-3">
+      <div className="sticky top-0 z-10 bg-paper/50 backdrop-blur-md shadow-lg/3 px-3 py-3">
 
         <div className="flex items-center justify-between">
 

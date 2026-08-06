@@ -63,7 +63,7 @@ export function ItemCard({
   }
 
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative">
       <button
         onClick={() => {
           setDragX(0)
@@ -90,7 +90,7 @@ export function ItemCard({
           transition: dragging.current ? 'none' : 'transform .2s ease',
           touchAction: 'pan-y',
         }}
-        className="relative cursor-pointer rounded-md  bg-paper-card p-4 active:bg-accent-soft"
+        className="relative cursor-pointer rounded-md bg-paper p-4 shadow-lg/5 active:bg-accent-soft"
       >
         {/* category and label */}
           <div className="mb-2.5 flex items-center justify-between px-0 py-1">
