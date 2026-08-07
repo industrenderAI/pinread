@@ -24,17 +24,70 @@ npm run dev
 ## 项目结构
 
 ```
-src/
-├── types/item.ts        笔记 / 批注 / 语言分类的数据结构定义
-├── storage/db.ts         数据存取（当前是 localStorage，以后换 SQLite 改这里）
-├── hooks/useItems.ts     笔记的增删改查逻辑
-├── components/
-│   ├── ItemList.tsx       列表页（搜索、语言筛选、笔记卡片）
-│   ├── ItemCard.tsx       单条笔记卡片
-│   ├── NewItemSheet.tsx   新建笔记页面
-│   ├── ItemDetail.tsx     详情页（划词加批注、展开/收起）
-│   └── NoteModal.tsx      添加批注的底部弹窗
-└── App.tsx                页面状态切换（列表 / 新建 / 详情）
+pinread/
+├── .git/
+├── .gitignore
+├── .env
+├── .env.example
+├── .oxlintrc.json
+├── index.html
+├── package.json
+├── package-lock.json
+├── README.md
+├── vite.config.ts
+├── tsconfig.json
+├── tsconfig.app.json
+├── tsconfig.node.json
+├── node_modules/
+├── public/
+│   ├── favicon.svg
+│   ├── icons.svg
+│   └── icons/
+├── src/
+│   ├── App.tsx
+│   ├── main.tsx
+│   ├── index.css
+│   ├── vite-env.d.ts
+│   ├── components/
+│   │   ├── AboutPage.tsx
+│   │   ├── AccountPage.tsx
+│   │   ├── Avatar.tsx
+│   │   ├── CategoryDot.tsx
+│   │   ├── CategoryFilterSheet.tsx
+│   │   ├── CategoryManagePage.tsx
+│   │   ├── CategoryPickerSheet.tsx
+│   │   ├── HelpPage.tsx
+│   │   ├── ItemCard.tsx
+│   │   ├── ItemDetail.tsx
+│   │   ├── ItemList.tsx
+│   │   ├── LoginPage.tsx
+│   │   ├── Logo.tsx
+│   │   ├── NewItemSheet.tsx
+│   │   ├── NoteModal.tsx
+│   │   ├── ProfilePage.tsx
+│   │   └── SyncSettingsPage.tsx
+│   ├── hooks/
+│   │   ├── useAuth.ts
+│   │   ├── useItems.ts
+│   │   ├── usePreferences.ts
+│   │   └── useTheme.ts
+│   ├── lib/
+│   │   ├── categoryColors.ts
+│   │   ├── supabaseClient.ts
+│   │   └── uuid.ts
+│   ├── storage/
+│   │   ├── cloudRepository.ts
+│   │   ├── localRepository.ts
+│   │   ├── migrateLocalToCloud.ts
+│   │   └── repository.ts
+│   └── types/
+│       └── item.ts
+└── supabase/
+    └── schema.sql
+```
+
+
+
 ```
 
 ## 接下来：打包成手机 App（Capacitor）
