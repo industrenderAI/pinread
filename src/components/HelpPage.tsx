@@ -164,8 +164,7 @@ const handleCopyEmail = () => {
         </div>
 
         {/* 底部联系客服卡片 */}
-        <div className="mt-auto mb-8 pt-8">
-          <div className="rounded-2xl border border-line p-5 bg-paper shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]">
+        <div className="mt-auto mb-12 pt-8">
             <p className="text-base font-bold text-ink">仍需帮助？</p>
             <p className="mt-1 text-xs text-ink-faint">
               如果以上解答未能解决您的问题，欢迎随时发送邮件联系我们。
@@ -184,7 +183,6 @@ const handleCopyEmail = () => {
                 {copied ? '已复制！' : '复制邮箱'}
               </button>
             </div>
-          </div>
         </div>
       </div>
     </div>
