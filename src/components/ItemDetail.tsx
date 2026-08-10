@@ -215,7 +215,7 @@ export function ItemDetail({
                 className="icon-btn mb-3.5 inline-flex items-center gap-1 text-[13px] text-ink-faint hover:text-ink"
               >
                 查看来源
-                <img src="/icons/link.svg" alt="" className="h-3 w-3" />
+                <img src="/icons/link.svg" alt="Source Link" className="h-2.5 w-2.5" />
               </button>
             ) : (
               <p className="mb-3.5 text-[13px] text-ink-faint">来自：{item.source}</p>

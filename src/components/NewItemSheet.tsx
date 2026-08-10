@@ -105,7 +105,7 @@ export function NewItemSheet({
                 value={source}
                 onChange={(e) => setSource(e.target.value)}
                 onFocus={handleSourceFocus}
-                placeholder="选填:如纽约时报"
+                placeholder="选填:如纽约时报或链接URL"
                 className="
                     w-full
                     h-10
@@ -141,7 +141,7 @@ export function NewItemSheet({
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="在这里粘贴或输入内容…"
-                  className="min-h-40 w-full rounded-lg border border-line/60 focus:border-accent focus:outline-hidden bg-paper-card text-ink p-3 text-lg leading-relaxed outline-none"
+                  className="min-h-100 w-full rounded-lg border border-line/60 focus:border-accent focus:outline-hidden bg-paper-card text-ink p-3 text-lg leading-relaxed outline-none"
                 />
 
 
