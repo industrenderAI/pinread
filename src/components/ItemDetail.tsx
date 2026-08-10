@@ -1,26 +1,7 @@
-// import { useRef, useState } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Item } from '../types/item'
 import { NoteModal } from './NoteModal'
 import { isUrl, openExternal } from '../lib/url'
-
-function ExternalLinkIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-      <path d="M15 3h6v6" />
-      <path d="M10 14 21 3" />
-    </svg>
-  )
-}
-
-function BackIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 19.93 27.53" className={className} fill="currentColor">
-      <path d="M18.93,27.53c-.21,0-.42-.06-.59-.2L0,13.77,18.34.2c.44-.33,1.07-.24,1.4.21.33.44.24,1.07-.21,1.4L3.36,13.77l16.17,11.96c.44.33.54.95.21,1.4-.2.27-.5.41-.8.41Z" />
-    </svg>
-  )
-}
 
 function getTextOffset(container: Node, node: Node, offset: number): number {
   let total = 0
@@ -71,16 +52,22 @@ export function ItemDetail({
     null,
   )
   const [selectionMenu, setSelectionMenu] = useState<{
-  x:number
-  y:number
-  start:number
-  end:number
-  text:string
-} | null>(null)
+    start: number
+    end: number
+    text: string
+    anchorLeft: number
+    anchorRight: number
+    anchorTop: number
+    anchorBottom: number
+  } | null>(null)
+  const [menuPos, setMenuPos] = useState<{ left: number; top: number } | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
   const [toolbarOpen, setToolbarOpen] = useState(false)
   const [sizePanelOpen, setSizePanelOpen] = useState(false)
   const [fontStep, setFontStep] = useState(2)
   const [annotationsVisible, setAnnotationsVisible] = useState(true)
+  const [immersive, setImmersive] = useState(false)
+
   useEffect(() => {
     const handler = () => {
       handleSelection()
@@ -92,6 +79,32 @@ export function ItemDetail({
       document.removeEventListener('selectionchange', handler)
     }
   }, [])
+
+  // 选中菜单渲染出来后，测量真实尺寸，再把它约束在可视区域内（不越界、自动上下翻转）
+  useLayoutEffect(() => {
+    if (!selectionMenu || !menuRef.current) {
+      setMenuPos(null)
+      return
+    }
+    const margin = 8
+    const gap = 10
+    const menuRect = menuRef.current.getBoundingClientRect()
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+
+    const anchorCenterX = (selectionMenu.anchorLeft + selectionMenu.anchorRight) / 2
+    let left = anchorCenterX - menuRect.width / 2
+    left = Math.max(margin, Math.min(left, vw - menuRect.width - margin))
+
+    // 优先放在选区上方，上方空间不够就翻到下方
+    let top = selectionMenu.anchorTop - menuRect.height - gap
+    if (top < margin) {
+      top = selectionMenu.anchorBottom + gap
+    }
+    top = Math.max(margin, Math.min(top, vh - menuRect.height - margin))
+
+    setMenuPos({ left, top })
+  }, [selectionMenu])
 
   const toggle = (id: string) => {
     setExpanded((prev) => {
@@ -117,18 +130,18 @@ export function ItemDetail({
     if (start < 0 || end < 0 || start === end) return
     if (start > end) [start, end] = [end, start]
 
-    // setPendingRange({ start, end, text: item.content.slice(start, end) })
-    // sel.removeAllRanges()
     const text = item.content.slice(start, end)
     const rect = range.getBoundingClientRect()
 
     setTimeout(() => {
       setSelectionMenu({
-        x: rect.left + rect.width / 2,
-        y: rect.top - 60,
         start,
         end,
         text,
+        anchorLeft: rect.left,
+        anchorRight: rect.right,
+        anchorTop: rect.top,
+        anchorBottom: rect.bottom,
       })
     }, 50)
   }
@@ -166,10 +179,10 @@ export function ItemDetail({
 
   return (
     <div className="fixed inset-0 z-20 mx-auto flex max-w-lg flex-col bg-paper">
-      <div className="flex items-center justify-between px-4 py-3.5">
-        <button onClick={onBack}>
-          <BackIcon className="w-4 h-4" />
-        </button>
+      <div className={`flex items-center justify-between px-4 py-3.5 ${immersive ? 'hidden' : ''}`}>
+       <button onClick={onBack} className="icon-btn">
+           <img src="/icons/back.svg" alt="" className="h-4 w-4" />
+         </button>
         <button
           onClick={() => setToolbarOpen((v) => !v)}
           aria-label="编辑"
@@ -199,10 +212,10 @@ export function ItemDetail({
               <button
                 type="button"
                 onClick={() => openExternal(item.source)}
-                className="mb-3.5 inline-flex items-center gap-1 text-[13px] text-ink-faint hover:text-ink"
+                className="icon-btn mb-3.5 inline-flex items-center gap-1 text-[13px] text-ink-faint hover:text-ink"
               >
                 查看来源
-                <ExternalLinkIcon className="h-3 w-3" />
+                <img src="/icons/link.svg" alt="" className="h-3 w-3" />
               </button>
             ) : (
               <p className="mb-3.5 text-[13px] text-ink-faint">来自：{item.source}</p>
@@ -210,6 +223,21 @@ export function ItemDetail({
           )}
         </div>
       </div>
+
+      <button
+        onClick={() => {
+        setImmersive((v) => !v)
+          if (!immersive) setToolbarOpen(false) // 进入全屏时顺手收起编辑工具条
+       }}
+       aria-label={immersive ? '退出' : '全屏'}
+       className="icon-btn fixed bottom-18 right-5 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-paper-card shadow-lg"
+      >
+        <img
+          src={immersive ? '/icons/fullscreen-exit.svg' : '/icons/fullscreen.svg'}
+          alt=""
+          className="h-4 w-4"
+        />
+     </button>
 
       {toolbarOpen && (
         <div className="border-t border-line bg-paper-card px-4 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-2.5">
@@ -284,85 +312,75 @@ export function ItemDetail({
       )}
 
       {selectionMenu && (
-      <div
-      className="
-      fixed
-      z-50
-      flex
-      items-center
-      gap-5
-      rounded-xl
-      bg-black
-      px-4
-      py-3
-      text-white
-      shadow-xl
-      "
-      style={{
-        left:selectionMenu.x,
-        top:selectionMenu.y,
-        transform:'translateX(-50%)'
-      }}
-      >
+        <div
+          ref={menuRef}
+          className="
+          fixed
+          z-50
+          flex
+          items-center
+          gap-5
+          rounded-xl
+          bg-black
+          px-4
+          py-3
+          text-white
+          shadow-xl
+          "
+          style={{
+            left: menuPos?.left ?? -9999,
+            top: menuPos?.top ?? -9999,
+            visibility: menuPos ? 'visible' : 'hidden',
+          }}
+        >
+          <button
+            onClick={() => {
+              setPendingRange({
+                start: selectionMenu.start,
+                end: selectionMenu.end,
+                text: selectionMenu.text,
+              })
+              window.getSelection()?.removeAllRanges()
+              setSelectionMenu(null)
+            }}
+            className="flex flex-col items-center text-xs"
+          >
+            笔记
+          </button>
 
+          <button
+            onClick={() => {
+              console.log('AI:', selectionMenu.text)
+              window.getSelection()?.removeAllRanges()
+            }}
+            className="flex flex-col items-center text-xs"
+            
+          >
+            AI
+          </button>
 
-      <button
-      onClick={()=>{
-      setPendingRange({
-        start:selectionMenu.start,
-        end:selectionMenu.end,
-        text:selectionMenu.text
-      })
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(selectionMenu.text)
+            window.getSelection()?.removeAllRanges()
+            setSelectionMenu(null)
+          }}
+          className="flex flex-col items-center text-xs"
+        >
+          复制
+        </button>
 
-      setSelectionMenu(null)
-      }}
-      className="flex flex-col items-center text-xs"
-      >
-      {/* <span>✎</span> */}
-      笔记
-      </button>
-
-      <button
-      onClick={()=>{
-      console.log(
-        "AI:",
-        selectionMenu.text
-      )
-      }}
-      className="flex flex-col items-center text-xs"
-      >
-      {/* <span>AI</span> */}
-      AI
-
-      </button>
-
-      <button
-      onClick={()=>{
-      navigator.clipboard.writeText(
-      selectionMenu.text
-      )
-      setSelectionMenu(null)
-      }}
-      className="flex flex-col items-center text-xs"
-      >
-      {/* <span>COPY</span> */}
-      复制
-      </button>
-
-      <button
-      onClick={()=>{
-      window.getSelection()?.removeAllRanges()
-      setSelectionMenu(null)
-      }}
-      className="flex flex-col items-center text-xs"
-      >
-
-      {/* <span>×</span> */}
-      取消
-      </button>
-      </div>
+          <button
+            onClick={() => {
+              window.getSelection()?.removeAllRanges()
+              setSelectionMenu(null)
+            }}
+            className="flex flex-col items-center text-xs"
+          >
+            取消
+          </button>
+        </div>
       )}
     </div>
-    
   )
 }
