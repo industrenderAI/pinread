@@ -33,13 +33,6 @@ const MENU_ITEMS = [
   },
 ]
 
-function BackIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 19.93 27.53" className={className} fill="currentColor">
-      <path d="M18.93,27.53c-.21,0-.42-.06-.59-.2L0,13.77,18.34.2c.44-.33,1.07-.24,1.4.21.33.44.24,1.07-.21,1.4L3.36,13.77l16.17,11.96c.44.33.54.95.21,1.4-.2.27-.5.41-.8.41Z" />
-    </svg>
-  )
-}
 
 function ChevronRight() {
   return (
@@ -99,9 +92,9 @@ function ChevronRight() {
         <button
           onClick={handleBack}
           aria-label="Back"
-          className="-m-3.5 flex items-center justify-center p-4"
+          className="-m-3.5 flex items-center justify-center p-4 icon-btn"
         >
-          <BackIcon className="w-4 h-4" />
+           <img src="/icons/back.svg" alt="" className="h-4 w-4" />
         </button>
 
         <div className="absolute left-1/2 -translate-x-1/2">

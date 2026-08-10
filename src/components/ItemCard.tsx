@@ -78,7 +78,7 @@ export function ItemCard({
         <img
             src="/icons/delete.svg"
             alt="delete"
-            className="h-12 w-auto"
+            className="h-10 w-auto"
         />
       </button>
       <div
@@ -95,7 +95,7 @@ export function ItemCard({
         className="relative cursor-pointer rounded-md bg-paper p-4 shadow-lg/5 active:bg-accent-soft"
       >
         {/* category and label */}
-          <div className="mb-2.5 flex items-center justify-between px-0 py-1">
+          <div className="mb-3 flex items-center justify-between px-0 py-1">
             <div className="flex items-center gap-1.5 text-xs text-ink font-extrabold ">
               <span> <CategoryDot color={item.category ? categoryColor : undefined} className="h-2 w-2" /></span>                <span> {item.category || '未分类'} </span> 
             </div>
@@ -107,7 +107,7 @@ export function ItemCard({
           </div>
  
         {/* preview textarea */}
-        <div className="mb-2 line-clamp-2 text-xs/6 leading-relaxed text-ink">
+        <div className="mb-4 line-clamp-2 text-md/6 leading-relaxed text-ink">
         <p>{preview}</p>
         </div>
         {/* source | time  */}
