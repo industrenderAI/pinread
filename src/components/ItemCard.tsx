@@ -1,6 +1,17 @@
 import { useRef, useState } from 'react'
 import type { Item } from '../types/item'
 import { CategoryDot } from './CategoryDot'
+import { isUrl, openExternal } from '../lib/url'
+
+function ExternalLinkIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <path d="M15 3h6v6" />
+      <path d="M10 14 21 3" />
+    </svg>
+  )
+}
 
 const DELETE_WIDTH = 76
 const OPEN_THRESHOLD = 40
@@ -110,8 +121,24 @@ export function ItemCard({
         </div>
         {/* source | time  */}
         <div className="flex items-center justify-between mt-2 text-ink-faint font-medium">
-        {item.source && <span className="text-xs">{item.source}</span>}
-        <span className="text-[10px]">{formatDate(item.updatedAt)}</span>
+          {item.source && (
+            isUrl(item.source) ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  openExternal(item.source)
+                }}
+                className="inline-flex items-center gap-1 text-xs hover:text-ink"
+              >
+                查看来源
+                <ExternalLinkIcon className="h-2.5 w-2.5" />
+              </button>
+            ) : (
+              <span className="text-xs">{item.source}</span>
+            )
+          )}
+          <span className="text-[10px]">{formatDate(item.updatedAt)}</span>
         </div>
       </div>
     </div>

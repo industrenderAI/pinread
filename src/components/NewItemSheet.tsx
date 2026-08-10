@@ -1,6 +1,16 @@
 import { useState } from 'react'
 import type { Category } from '../types/item'
 import { CategoryPickerField, CategoryPickerSheet } from './CategoryPickerSheet'
+import { isUrl } from '../lib/url'
+
+function BackIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 19.93 27.53" className={className} fill="currentColor">
+      <path d="M18.93,27.53c-.21,0-.42-.06-.59-.2L0,13.77,18.34.2c.44-.33,1.07-.24,1.4.21.33.44.24,1.07-.21,1.4L3.36,13.77l16.17,11.96c.44.33.54.95.21,1.4-.2.27-.5.41-.8.41Z" />
+    </svg>
+  )
+}
+
 
 export function NewItemSheet({
   categories,
@@ -24,7 +34,17 @@ export function NewItemSheet({
   )
 
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [clipSuggestion, setClipSuggestion] = useState('')
 
+  const handleSourceFocus = async () => {
+    if (source) return
+    try {
+      const text = (await navigator.clipboard.readText()).trim()
+      if (isUrl(text)) setClipSuggestion(text)
+    } catch {
+      // 剪贴板权限被拒绝或非 HTTPS 环境，静默忽略
+    }
+  }
 
   const handleSave = () => {
     if (!content.trim()) {
@@ -48,8 +68,8 @@ export function NewItemSheet({
           onClick={onCancel}
           className="text-base font-semibold text-ink"
         >
-          <img src="/icons/close.svg" alt="Close icon" className="h-4 w-4" />
-        </button>
+          <BackIcon className="w-4 h-4" />
+         </button>
 
         <span className="text-lg font-bold">
           {isEdit ? '编辑笔记' : '新笔记'}
@@ -84,6 +104,7 @@ export function NewItemSheet({
               <input
                 value={source}
                 onChange={(e) => setSource(e.target.value)}
+                onFocus={handleSourceFocus}
                 placeholder="选填:如纽约时报"
                 className="
                     w-full
@@ -96,8 +117,20 @@ export function NewItemSheet({
                     px-3
                     text-lg
                     outline-none
-                    text-ink-faint"
+                    text-ink"
               />
+              {clipSuggestion && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSource(clipSuggestion)
+                    setClipSuggestion('')
+                  }}
+                  className="mt-1.5 text-xs font-bold text-accent-text underline"
+                >
+                  检测到链接，点击填入↵
+                </button>
+              )}
             </div>
             
             <div className='mt-8'>
@@ -108,7 +141,7 @@ export function NewItemSheet({
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="在这里粘贴或输入内容…"
-                  className="min-h-40 w-full rounded-lg border border-line/60 focus:border-accent focus:outline-hidden bg-paper-card text-ink-faint p-3 text-lg leading-relaxed outline-none"
+                  className="min-h-40 w-full rounded-lg border border-line/60 focus:border-accent focus:outline-hidden bg-paper-card text-ink p-3 text-lg leading-relaxed outline-none"
                 />
 
 

@@ -2,6 +2,17 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Item } from '../types/item'
 import { NoteModal } from './NoteModal'
+import { isUrl, openExternal } from '../lib/url'
+
+function ExternalLinkIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <path d="M15 3h6v6" />
+      <path d="M10 14 21 3" />
+    </svg>
+  )
+}
 
 function BackIcon({ className }: { className?: string }) {
   return (
@@ -182,8 +193,21 @@ export function ItemDetail({
             {nodes}
           </div>
         </div>
-        <div className="mt-6 border-t border-line pt-3.5 text-[12.5px] leading-relaxed text-ink-faint">
-          {item.source && <p className="mb-3.5 text-[13px] text-ink-faint">来自：{item.source}</p>}
+        <div className="mt-6 border-t border-line pt-3.5 text-xs leading-relaxed text-ink-faint">
+          {item.source && (
+            isUrl(item.source) ? (
+              <button
+                type="button"
+                onClick={() => openExternal(item.source)}
+                className="mb-3.5 inline-flex items-center gap-1 text-[13px] text-ink-faint hover:text-ink"
+              >
+                查看来源
+                <ExternalLinkIcon className="h-3 w-3" />
+              </button>
+            ) : (
+              <p className="mb-3.5 text-[13px] text-ink-faint">来自：{item.source}</p>
+            )
+          )}
         </div>
       </div>
 
@@ -294,7 +318,7 @@ export function ItemDetail({
       }}
       className="flex flex-col items-center text-xs"
       >
-      <span>✎</span>
+      {/* <span>✎</span> */}
       笔记
       </button>
 
@@ -307,8 +331,8 @@ export function ItemDetail({
       }}
       className="flex flex-col items-center text-xs"
       >
-      <span>AI</span>
-      解释
+      {/* <span>AI</span> */}
+      AI
 
       </button>
 
@@ -321,7 +345,7 @@ export function ItemDetail({
       }}
       className="flex flex-col items-center text-xs"
       >
-      <span>□</span>
+      {/* <span>COPY</span> */}
       复制
       </button>
 
@@ -333,7 +357,7 @@ export function ItemDetail({
       className="flex flex-col items-center text-xs"
       >
 
-      <span>×</span>
+      {/* <span>×</span> */}
       取消
       </button>
       </div>
