@@ -474,9 +474,6 @@ export function ItemDetail({
               >
                 删除
               </button>
-              <button onClick={closeViewingAnnotation} className="text-sm text-ink">
-                关闭
-              </button>
             </div>
           </div>
         </div>
