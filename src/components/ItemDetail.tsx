@@ -74,6 +74,9 @@ export function ItemDetail({
   const [fontStep, setFontStep] = useState(2)
   const [annotationsVisible, setAnnotationsVisible] = useState(true)
   const [immersive, setImmersive] = useState(false)
+  
+  // 记录是否处于交互/拖拽状态（支持 mouse 与 touch）
+  const isMouseDownRef = useRef(false)
 
   useEffect(() => {
     const handler = () => {
@@ -87,7 +90,7 @@ export function ItemDetail({
     }
   }, [])
 
-  // 选中菜单渲染出来后，测量真实尺寸，再把它约束在可视区域内（不越界、自动上下翻转）
+  // 选中菜单渲染出来后，测量真实尺寸，再把它约束在可视区域内
   useLayoutEffect(() => {
     if (!selectionMenu || !menuRef.current) {
       setMenuPos(null)
@@ -103,7 +106,6 @@ export function ItemDetail({
     let left = anchorCenterX - menuRect.width / 2
     left = Math.max(margin, Math.min(left, vw - menuRect.width - margin))
 
-    // 优先放在选区上方，上方空间不够就翻到下方
     let top = selectionMenu.anchorTop - menuRect.height - gap
     if (top < margin) {
       top = selectionMenu.anchorBottom + gap
@@ -113,7 +115,7 @@ export function ItemDetail({
     setMenuPos({ left, top })
   }, [selectionMenu])
 
-  // 点击菜单以外的任何地方（空白处、正文其他位置等），关闭菜单——和系统自带的选中气泡行为一致。
+  // 点击/触摸菜单以外的地方关闭菜单
   useEffect(() => {
     if (!selectionMenu) return
 
@@ -133,7 +135,44 @@ export function ItemDetail({
     }
   }, [selectionMenu])
 
+  // 统一处理鼠标按压与触屏手势
+  useEffect(() => {
+    const handleStart = (e: MouseEvent | TouchEvent) => {
+      if (contentRef.current?.contains(e.target as Node)) {
+        isMouseDownRef.current = true
+      }
+    }
+
+    const handleEnd = () => {
+      if (isMouseDownRef.current) {
+        isMouseDownRef.current = false
+        // 延迟一小段时间以保证移动端原生 Selection 状态更新到位
+        setTimeout(() => {
+          handleSelection()
+        }, 10)
+      }
+    }
+
+    document.addEventListener('mousedown', handleStart)
+    document.addEventListener('touchstart', handleStart, { passive: true })
+    
+    document.addEventListener('mouseup', handleEnd)
+    document.addEventListener('touchend', handleEnd)
+    document.addEventListener('touchcancel', handleEnd)
+
+    return () => {
+      document.removeEventListener('mousedown', handleStart)
+      document.removeEventListener('touchstart', handleStart)
+      document.removeEventListener('mouseup', handleEnd)
+      document.removeEventListener('touchend', handleEnd)
+      document.removeEventListener('touchcancel', handleEnd)
+    }
+  }, [])
+
   const handleSelection = () => {
+    // 按住拖拽或调整放大镜手柄中，直接跳过
+    if (isMouseDownRef.current) return
+    
     const sel = window.getSelection()
     if (!sel || sel.isCollapsed || sel.rangeCount === 0) return
     const container = contentRef.current
@@ -161,8 +200,6 @@ export function ItemDetail({
         anchorTop: rect.top,
         anchorBottom: rect.bottom,
       })
-      // 清掉系统原生选区，让 iOS/浏览器自带的气泡消失，只留自定义菜单。
-      // 视觉上的"选中高亮"改由下面 nodes 渲染逻辑里的自定义 <span> 接管，不会因此消失。
       sel.removeAllRanges()
     }, 50)
   }
@@ -171,8 +208,6 @@ export function ItemDetail({
     setViewingAnnotation(null)
   }
 
-  // 把批注区间和当前临时选区高亮区间的所有起止点合并，按顺序切分全文，
-  // 逐段判断它落在哪个批注/是否处于高亮区间内，从而支持两者互相独立又能重叠显示。
   const sortedAnns = [...item.annotations].sort((a, b) => a.start - b.start)
   const highlightRange = selectionMenu ? { start: selectionMenu.start, end: selectionMenu.end } : null
 
@@ -223,9 +258,9 @@ export function ItemDetail({
   return (
     <div className="fixed inset-0 z-20 mx-auto flex max-w-lg flex-col bg-paper">
       <div className={`flex items-center justify-between px-4 py-3.5 ${immersive ? 'hidden' : ''}`}>
-       <button onClick={onBack} className="icon-btn">
-           <img src="/icons/back.svg" alt="" className="h-4 w-4" />
-         </button>
+        <button onClick={onBack} className="icon-btn">
+          <img src="/icons/back.svg" alt="" className="h-4 w-4" />
+        </button>
         <button
           onClick={() => setToolbarOpen((v) => !v)}
           aria-label="编辑"
@@ -241,8 +276,6 @@ export function ItemDetail({
         <div className={annotationsVisible ? '' : 'ann-hidden'}>
           <div
             ref={contentRef}
-            onMouseUp={handleSelection}
-            onTouchEnd={() => {}}
             style={{ fontSize: FONT_SIZES[fontStep] }}
             className="font-serif-cn whitespace-pre-wrap leading-loose"
           >
@@ -269,18 +302,18 @@ export function ItemDetail({
 
       <button
         onClick={() => {
-        setImmersive((v) => !v)
-          if (!immersive) setToolbarOpen(false) // 进入全屏时顺手收起编辑工具条
-       }}
-       aria-label={immersive ? '退出' : '全屏'}
-       className="icon-btn fixed bottom-18 right-5 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-paper-card shadow-lg"
+          setImmersive((v) => !v)
+          if (!immersive) setToolbarOpen(false)
+        }}
+        aria-label={immersive ? '退出' : '全屏'}
+        className="icon-btn fixed bottom-18 right-5 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-paper-card shadow-lg"
       >
         <img
           src={immersive ? '/icons/fullscreen-exit.svg' : '/icons/fullscreen.svg'}
           alt=""
           className="h-4 w-4"
         />
-     </button>
+      </button>
 
       {toolbarOpen && (
         <div className="border-t border-line bg-paper-card px-4 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-2.5">
@@ -370,19 +403,7 @@ export function ItemDetail({
       {selectionMenu && (
         <div
           ref={menuRef}
-          className="
-          fixed
-          z-50
-          flex
-          items-center
-          gap-5
-          rounded-xl
-          bg-black
-          px-4
-          py-3
-          text-white
-          shadow-xl
-          "
+          className="fixed z-50 flex items-center gap-5 rounded-xl bg-black px-4 py-3 text-white shadow-xl"
           style={{
             left: menuPos?.left ?? -9999,
             top: menuPos?.top ?? -9999,
@@ -410,21 +431,20 @@ export function ItemDetail({
               window.getSelection()?.removeAllRanges()
             }}
             className="flex flex-col items-center text-xs"
-            
           >
             AI
           </button>
 
-        <button
-          onClick={() => {
-            navigator.clipboard.writeText(selectionMenu.text)
-            window.getSelection()?.removeAllRanges()
-            setSelectionMenu(null)
-          }}
-          className="flex flex-col items-center text-xs"
-        >
-          复制
-        </button>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(selectionMenu.text)
+              window.getSelection()?.removeAllRanges()
+              setSelectionMenu(null)
+            }}
+            className="flex flex-col items-center text-xs"
+          >
+            复制
+          </button>
 
           <button
             onClick={() => {
@@ -444,10 +464,10 @@ export function ItemDetail({
           onClick={closeViewingAnnotation}
         >
           <div
-            className="w-full  max-w-sm rounded-lg bg-paper-card p-4 shadow-lg"
+            className="w-full max-w-sm rounded-lg bg-paper-card p-4 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="mb-6 rounded-lg  py-4 text-sm font-bold text-ink border-b border-line ">
+            <p className="mb-6 border-b border-line py-4 text-sm font-bold text-ink">
               {item.content.slice(viewingAnnotation.start, viewingAnnotation.end)}
             </p>
 
