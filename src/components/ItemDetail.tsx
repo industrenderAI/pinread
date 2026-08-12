@@ -113,6 +113,26 @@ export function ItemDetail({
     setMenuPos({ left, top })
   }, [selectionMenu])
 
+  // 点击菜单以外的任何地方（空白处、正文其他位置等），关闭菜单——和系统自带的选中气泡行为一致。
+  useEffect(() => {
+    if (!selectionMenu) return
+
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setSelectionMenu(null)
+        window.getSelection()?.removeAllRanges()
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick)
+    document.addEventListener('touchstart', handleOutsideClick)
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick)
+      document.removeEventListener('touchstart', handleOutsideClick)
+    }
+  }, [selectionMenu])
+
   const handleSelection = () => {
     const sel = window.getSelection()
     if (!sel || sel.isCollapsed || sel.rangeCount === 0) return
@@ -141,6 +161,9 @@ export function ItemDetail({
         anchorTop: rect.top,
         anchorBottom: rect.bottom,
       })
+      // 清掉系统原生选区，让 iOS/浏览器自带的气泡消失，只留自定义菜单。
+      // 视觉上的"选中高亮"改由下面 nodes 渲染逻辑里的自定义 <span> 接管，不会因此消失。
+      sel.removeAllRanges()
     }, 50)
   }
 
@@ -148,23 +171,54 @@ export function ItemDetail({
     setViewingAnnotation(null)
   }
 
+  // 把批注区间和当前临时选区高亮区间的所有起止点合并，按顺序切分全文，
+  // 逐段判断它落在哪个批注/是否处于高亮区间内，从而支持两者互相独立又能重叠显示。
   const sortedAnns = [...item.annotations].sort((a, b) => a.start - b.start)
-  const nodes: React.ReactNode[] = []
-  let pos = 0
+  const highlightRange = selectionMenu ? { start: selectionMenu.start, end: selectionMenu.end } : null
+
+  const breakpoints = new Set<number>([0, item.content.length])
   sortedAnns.forEach((a) => {
-    if (pos < a.start) nodes.push(item.content.slice(pos, a.start))
-    nodes.push(
-      <span
-        key={a.id}
-        className={`ann ${viewingAnnotation?.id === a.id ? 'active' : ''}`}
-        onClick={() => setViewingAnnotation(a)}
-      >
-        {item.content.slice(a.start, a.end)}
-      </span>,
-    )
-    pos = a.end
+    breakpoints.add(a.start)
+    breakpoints.add(a.end)
   })
-  if (pos < item.content.length) nodes.push(item.content.slice(pos))
+  if (highlightRange) {
+    breakpoints.add(highlightRange.start)
+    breakpoints.add(highlightRange.end)
+  }
+  const points = [...breakpoints].sort((a, b) => a - b)
+
+  const nodes: React.ReactNode[] = []
+  for (let i = 0; i < points.length - 1; i++) {
+    const segStart = points[i]
+    const segEnd = points[i + 1]
+    if (segStart >= segEnd) continue
+    const text = item.content.slice(segStart, segEnd)
+    const ann = sortedAnns.find((a) => a.start <= segStart && a.end >= segEnd)
+    const isHighlighted =
+      !!highlightRange && highlightRange.start <= segStart && highlightRange.end >= segEnd
+
+    if (ann) {
+      nodes.push(
+        <span
+          key={`ann-${ann.id}-${segStart}`}
+          className={`ann ${viewingAnnotation?.id === ann.id ? 'active' : ''} ${
+            isHighlighted ? 'bg-accent-soft' : ''
+          }`}
+          onClick={() => setViewingAnnotation(ann)}
+        >
+          {text}
+        </span>,
+      )
+    } else if (isHighlighted) {
+      nodes.push(
+        <span key={`hl-${segStart}`} className="bg-accent-soft">
+          {text}
+        </span>,
+      )
+    } else {
+      nodes.push(text)
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-20 mx-auto flex max-w-lg flex-col bg-paper">
