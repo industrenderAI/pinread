@@ -251,6 +251,37 @@ export function useItems(userId: string | null) {
     [repo],
   )
 
+  const editAnnotation = useCallback(
+    async (
+      itemId: string,
+      annotationId: string,
+      note: string,
+    ) => {
+      const now = Date.now()
+
+      await repo.updateAnnotation(
+        itemId,
+        annotationId,
+        note,
+        now,
+      )
+
+      setItems((prev) =>
+        prev.map((it) =>
+          it.id === itemId
+            ? {
+                ...it,
+                annotations: it.annotations.map((a) =>
+                  a.id === annotationId ? { ...a, note } : a,
+                ),
+                updatedAt: now,
+              }
+            : it,
+        ),
+      )
+    },
+    [repo],
+  )
 
   const addCategory = useCallback(
     async (name: string, color?: string) => {
@@ -348,6 +379,7 @@ export function useItems(userId: string | null) {
 
     addAnnotation,
     deleteAnnotation,
+    editAnnotation,
 
     addCategory,
     updateCategory,

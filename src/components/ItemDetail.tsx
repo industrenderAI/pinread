@@ -37,6 +37,7 @@ export function ItemDetail({
   onToggleTheme,
   onAddAnnotation,
   onDeleteAnnotation,
+  onEditAnnotation,
 }: {
   item: Item
   theme: 'light' | 'dark'
@@ -45,9 +46,15 @@ export function ItemDetail({
   onToggleTheme: () => void
   onAddAnnotation: (start: number, end: number, note: string) => void
   onDeleteAnnotation: (annotationId: string) => void
+  onEditAnnotation: (annotationId: string, note: string) => void
 }) {
   const contentRef = useRef<HTMLDivElement>(null)
-  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [viewingAnnotation, setViewingAnnotation] = useState<Item['annotations'][number] | null>(
+    null,
+  )
+  const [editingAnnotation, setEditingAnnotation] = useState<Item['annotations'][number] | null>(
+    null,
+  )
   const [pendingRange, setPendingRange] = useState<{ start: number; end: number; text: string } | null>(
     null,
   )
@@ -106,15 +113,6 @@ export function ItemDetail({
     setMenuPos({ left, top })
   }, [selectionMenu])
 
-  const toggle = (id: string) => {
-    setExpanded((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
-
   const handleSelection = () => {
     const sel = window.getSelection()
     if (!sel || sel.isCollapsed || sel.rangeCount === 0) return
@@ -146,31 +144,22 @@ export function ItemDetail({
     }, 50)
   }
 
+  const closeViewingAnnotation = () => {
+    setViewingAnnotation(null)
+  }
+
   const sortedAnns = [...item.annotations].sort((a, b) => a.start - b.start)
   const nodes: React.ReactNode[] = []
   let pos = 0
   sortedAnns.forEach((a) => {
     if (pos < a.start) nodes.push(item.content.slice(pos, a.start))
-    const isOpen = expanded.has(a.id)
     nodes.push(
-      <span key={a.id}>
-        <span className={`ann ${isOpen ? 'active' : ''}`} onClick={() => toggle(a.id)}>
-          {item.content.slice(a.start, a.end)}
-        </span>
-        {isOpen && (
-          <span className="mt-1.5 mb-2.5 block rounded-lg bg-accent-soft px-3 py-2.5 font-sans">
-            <span className="block whitespace-pre-wrap text-sm text-ink">{a.note}</span>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onDeleteAnnotation(a.id)
-              }}
-              className="mt-1 block text-xs text-danger"
-            >
-              删除这条批注
-            </button>
-          </span>
-        )}
+      <span
+        key={a.id}
+        className={`ann ${viewingAnnotation?.id === a.id ? 'active' : ''}`}
+        onClick={() => setViewingAnnotation(a)}
+      >
+        {item.content.slice(a.start, a.end)}
       </span>,
     )
     pos = a.end
@@ -311,6 +300,19 @@ export function ItemDetail({
         />
       )}
 
+      {editingAnnotation && (
+        <NoteModal
+          quote={item.content.slice(editingAnnotation.start, editingAnnotation.end)}
+          initialNote={editingAnnotation.note}
+          title="修改笔记"
+          onCancel={() => setEditingAnnotation(null)}
+          onSave={(note) => {
+            onEditAnnotation(editingAnnotation.id, note)
+            setEditingAnnotation(null)
+          }}
+        />
+      )}
+
       {selectionMenu && (
         <div
           ref={menuRef}
@@ -379,6 +381,50 @@ export function ItemDetail({
           >
             取消
           </button>
+        </div>
+      )}
+
+      {viewingAnnotation && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 px-6"
+          onClick={closeViewingAnnotation}
+        >
+          <div
+            className="w-full  max-w-sm rounded-lg bg-paper-card p-4 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="mb-6 rounded-lg  py-4 text-sm font-bold text-ink border-b border-line ">
+              {item.content.slice(viewingAnnotation.start, viewingAnnotation.end)}
+            </p>
+
+            <p className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-ink">
+              {viewingAnnotation.note}
+            </p>
+
+            <div className="mt-12 flex items-center justify-end gap-6">
+              <button
+                onClick={() => {
+                  setEditingAnnotation(viewingAnnotation)
+                  setViewingAnnotation(null)
+                }}
+                className="text-sm text-ink"
+              >
+                修改
+              </button>
+              <button
+                onClick={() => {
+                  onDeleteAnnotation(viewingAnnotation.id)
+                  closeViewingAnnotation()
+                }}
+                className="text-sm text-danger"
+              >
+                删除
+              </button>
+              <button onClick={closeViewingAnnotation} className="text-sm text-ink">
+                关闭
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

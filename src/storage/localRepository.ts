@@ -89,6 +89,23 @@ export const localRepository: Repository = {
     )
   },
 
+  async updateAnnotation(itemId, annotationId, note, updatedAt) {
+    writeItems(
+      readItems().map((it) =>
+        it.id === itemId
+          ? {
+              ...it,
+              annotations: it.annotations.map((a) =>
+                a.id === annotationId ? { ...a, note } : a,
+              ),
+              updatedAt,
+            }
+          : it,
+      ),
+    )
+  },
+
+
   async addCategory(category) {
     writeCategories([
       ...(readCategories() ?? []),

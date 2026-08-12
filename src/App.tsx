@@ -56,6 +56,7 @@ function App() {
 
     addAnnotation,
     deleteAnnotation,
+    editAnnotation,
 
     addCategory,
     updateCategory,
@@ -206,7 +207,7 @@ const selected = items.find((it) => it.id === selectedId) ?? null
         />
       )}
       
-      {view === 'detail' && selected && (
+ {view === 'detail' && selected && (
         <ItemDetail
           item={selected}
           theme={theme}
@@ -218,6 +219,9 @@ const selected = items.find((it) => it.id === selectedId) ?? null
           }
           onDeleteAnnotation={(annotationId) =>
             deleteAnnotation(selected.id, annotationId)
+          }
+          onEditAnnotation={(annotationId, note) =>
+            editAnnotation(selected.id, annotationId, note)
           }
         />
       )}

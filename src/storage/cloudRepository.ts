@@ -158,6 +158,32 @@ export function createCloudRepository(userId: string): Repository {
       if (updateError) throw updateError
     },
 
+    async updateAnnotation(itemId, annotationId, note, updatedAt) {
+      const { data, error } = await supabase
+        .from('items')
+        .select('annotations')
+        .eq('id', itemId)
+        .eq('user_id', userId)
+        .single()
+
+      if (error) throw error
+
+      const next = (((data?.annotations as Annotation[] | null) ?? [])).map((a) =>
+        a.id === annotationId ? { ...a, note } : a,
+      )
+
+      const { error: updateError } = await supabase
+        .from('items')
+        .update({
+          annotations: next,
+          updated_at: updatedAt,
+        })
+        .eq('id', itemId)
+        .eq('user_id', userId)
+
+      if (updateError) throw updateError
+    },
+
     async addCategory(category) {
       const { error } = await supabase
         .from('categories')

@@ -26,6 +26,13 @@ export interface Repository {
 
   addAnnotation(itemId: string, annotation: Annotation, updatedAt: number): Promise<void>
   deleteAnnotation(itemId: string, annotationId: string, updatedAt: number): Promise<void>
+  updateAnnotation(
+  itemId: string,
+  annotationId: string,
+  note: string,
+  updatedAt: number,
+  ): Promise<void>
+
 
   addCategory(category: Category): Promise<Category>
   updateCategory(id: string, name: string, color?: string): Promise<void>
