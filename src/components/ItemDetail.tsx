@@ -459,29 +459,29 @@ export function ItemDetail({
       )}
 
 
-      {viewingAnnotation && (
+    {viewingAnnotation && (
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-0 transition-opacity"
           onClick={closeViewingAnnotation}
         >
           <div
-            className="w-full max-w-lg rounded-t-2xl bg-paper-card p-5 shadow-2xl transition-transform max-h-[80vh] flex flex-col"
+            className="w-full max-w-lg rounded-t-2xl bg-paper-card p-5 shadow-2xl max-h-[85vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* 顶部小拉条 handle，增强底部抽屉视觉感 */}
+            {/* 顶部小拉条 */}
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-faint/20 shrink-0" />
 
-            {/* 引用文字区域（如果引用内容太长也可滚动） */}
-            <p className="mb-4 max-h-32 overflow-y-auto border-b border-line pb-3 text-sm font-bold text-ink leading-relaxed">
+            {/* 引用原文：完全自然展开，不加滚动条 */}
+            <p className="mb-4 border-b border-line pb-3 text-sm font-bold leading-relaxed text-ink shrink-0">
               {item.content.slice(viewingAnnotation.start, viewingAnnotation.end)}
             </p>
 
-            {/* 笔记正文区域：自适应高度 + 超长可滑动 */}
+            {/* 笔记正文：如果整块卡片超过屏幕85%高度，这里自动负责滚动 */}
             <div className="flex-1 overflow-y-auto pr-1 font-sans text-sm leading-relaxed text-ink whitespace-pre-wrap">
               {viewingAnnotation.note}
             </div>
 
-            {/* 底部按钮栏 */}
+            {/* 底部操作栏 */}
             <div className="mt-6 flex items-center justify-end gap-6 pt-3 border-t border-line/50 shrink-0">
               <button
                 onClick={() => {
